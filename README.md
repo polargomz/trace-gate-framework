@@ -60,4 +60,9 @@ flowchart LR
 
 ## 라이선스
 
-아직 별도 라이선스를 지정하지 않았습니다. 공개 재사용 조건을 확정하려면 프로젝트 목적에 맞는 라이선스를 별도 결정해야 합니다.
+Copyright © 2026 polargomz.
+
+별도로 표시하지 않은 이 저장소의 문서, 도표와 템플릿은
+[Creative Commons Attribution 4.0 International](https://creativecommons.org/licenses/by/4.0/)에 따라 제공됩니다.
+
+누구나 상업적 목적을 포함해 공유·수정·재배포할 수 있습니다. 재배포할 때는 적절한 저작자 표시와 라이선스 링크를 제공하고, 변경했다면 그 사실을 밝혀야 합니다. 자세한 조건은 [`LICENSE`](LICENSE)를 확인하세요.
