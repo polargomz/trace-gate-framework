@@ -26,3 +26,7 @@ TRACE Gate Framework에 대한 개선 제안과 기여를 환영합니다.
 - [ ] Mermaid code block이 정상적으로 닫혔습니다.
 - [ ] 비밀정보와 내부 경로가 없습니다.
 - [ ] 남은 한계와 후속 작업을 기록했습니다.
+
+## 기여 라이선스
+
+Pull Request 또는 그 밖의 방법으로 이 저장소에 기여물을 제출하면, 별도로 명시하고 합의하지 않는 한 해당 기여물을 [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/)으로 제공하는 데 동의하는 것으로 봅니다.
