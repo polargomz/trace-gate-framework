@@ -1,0 +1,16 @@
+gate_id: GATE.STAGE2.PRIMARY
+evaluated_at: 2026-01-02T09:00:00+09:00
+status: measuring  # pass | fail | measuring | blocked
+evidence_refs: []
+
+thresholds:
+  success_rate: ">= 99%"
+  duplicate_writes: 0
+  forbidden_changes: 0
+  rollback_rehearsal: pass
+
+decision:
+  newly_allowed_authority: []
+  still_forbidden: []
+
+approved_by: null

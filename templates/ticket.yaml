@@ -1,0 +1,10 @@
+ticket_id: PROJ-123
+request_id: REQ.YYYYMMDD.HHMM.SHORT.NAME
+title: "작고 검증 가능한 능력"
+status: planned
+dependencies: []
+artifacts: []
+acceptance_criteria: []
+verification: []
+blockers: []
+updated_at: null

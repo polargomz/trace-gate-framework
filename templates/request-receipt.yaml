@@ -1,0 +1,27 @@
+request_id: REQ.YYYYMMDD.HHMM.SHORT.NAME
+received_at: 2026-01-01T09:00:00+09:00
+request_text: "사용자 원문"
+parent_request_id: null
+status: in_progress
+decision: IMPLEMENT_AND_VALIDATE
+
+scope:
+  goals: []
+  non_goals: []
+  allowed_side_effects: []
+  forbidden_actions: []
+
+boundaries:
+  allowed_write_roots: []
+  forbidden_write_roots: []
+  writer_authority_change: false
+
+completion:
+  required_artifacts: []
+  required_tests: []
+  required_gates: []
+
+pre_action_gate:
+  classified_before_execution: true
+  gate_status: passed
+  passed_at: 2026-01-01T09:01:00+09:00

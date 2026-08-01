@@ -1,0 +1,30 @@
+evidence_id: EVD.YYYYMMDD.HHMM.RUN
+request_id: REQ.YYYYMMDD.HHMM.SHORT.NAME
+ticket_ids: []
+observed_at: 2026-01-01T10:00:00+09:00
+
+source:
+  git_commit: null
+  image_digest: null
+  schema_version: null
+
+runtime:
+  host: null
+  run_id: null
+  exit_code: null
+  status: null
+
+validation:
+  tests_passed: 0
+  tests_failed: 0
+  warnings: 0
+  before_hash: null
+  after_hash: null
+  invariant_passed: false
+
+artifacts:
+  - path: null
+    sha256: null
+
+secrets_redacted: true
+raw_evidence_location: null
