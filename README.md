@@ -119,7 +119,7 @@ python3 -m venv .venv
 
 ## 라이선스
 
-Copyright © 2026 polargomz.
+Copyright © 2026 D. JEONG.
 
 별도로 표시하지 않은 이 저장소의 문서, 도표와 템플릿은
 [Creative Commons Attribution 4.0 International](https://creativecommons.org/licenses/by/4.0/)에 따라 제공됩니다.

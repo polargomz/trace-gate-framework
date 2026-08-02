@@ -9,7 +9,7 @@
 - Scope: 문서·원장·증적의 생성, 읽기, 변경, 추적, 보존과 폐기
 - Normative dependency: TRACE Gate Framework의 Request, Boundary, Evidence, Promotion과 Handoff 계약
 - Implementation portability: 저장소, 데이터베이스, 클라우드, 특정 LLM 또는 실행 도구에 비종속
-- Author: polargomz
+- Author: D. JEONG
 - License: [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/)
 
 ## 1. 목적
@@ -48,7 +48,7 @@ TRACE-DM은 TRACE Gate Framework의 상위 승인 모델을 대체하지 않는�
 | `1. Intake` | 문서 목적·대상·operation을 Request와 연결 |
 | `2. Boundary` | canonical owner, 허용·금지 위치, 접근·보존 경계 확정 |
 | `3. Capability Slice` | revision, projection, validator를 작은 단위로 구현 |
-| `4. Local Verification` | schema·integrity·lineage·freshness·음성 테스트 |
+| `4. Local Verification` | schema·integrity·lineage·freshness·네거티브 테스트 |
 | `5. Remote Staging` | 정본을 건드리지 않는 draft/preview publication |
 | `6. Observation Window` | freshness, context SLO, stale·drift incident 관찰 |
 | `7. Authority Promotion` | Publication Gate 뒤 active/canonical authority 승격 |
@@ -651,7 +651,7 @@ stateDiagram-v2
 
 ## 20. 검증과 적합성 수준
 
-### 필수 음성 테스트
+### 필수 네거티브 테스트
 
 - source hash mismatch Summary 거부
 - stale Summary의 Records fallback
@@ -700,7 +700,7 @@ stateDiagram-v2
 4. 소수 원장을 선택해 deterministic Summary와 Overview를 도입한다.
 5. 작업별 ReadProfile과 context budget을 정의한다.
 6. 기존 full-read와 profile 결과의 의미적 동등성을 비교한다.
-7. fail-closed validator와 음성 테스트를 CI에 연결한다.
+7. fail-closed validator와 네거티브 테스트를 CI에 연결한다.
 8. 안정화 후 partition, 서명, archive, registry와 outbox로 확대한다.
 9. semantic 탐색이 실제로 필요한 문서군만 Embedding Group으로 등록한다.
 10. exact baseline과 semantic·hybrid 결과의 recall, freshness와 접근 경계를 비교한다.
@@ -757,6 +757,6 @@ TRACE core와 공유해야 하는 integration point:
 
 ## 라이선스
 
-Copyright © 2026 polargomz.
+Copyright © 2026 D. JEONG.
 
 이 문서는 TRACE Gate Framework와 동일하게 [Creative Commons Attribution 4.0 International](https://creativecommons.org/licenses/by/4.0/)에 따라 제공된다. 공유하거나 수정한 자료를 배포할 때는 적절한 저작자 표시와 라이선스 링크를 제공하고 변경 사실을 밝혀야 한다.

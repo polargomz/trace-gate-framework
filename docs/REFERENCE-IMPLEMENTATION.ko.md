@@ -36,7 +36,7 @@ CI는 같은 검증을 Python 3.12에서 수행한다.
 | `src/trace_gate/runtime.py` | bounded model/tool/verifier loop와 checkpoint |
 | `src/trace_gate/multi_agent.py` | writer lease, cancellation과 merge conflict 검사 |
 | `templates/` | 구현자가 채워야 할 계약 예제 |
-| `tests/` | 정상·음성·실패·resume·권한 테스트 |
+| `tests/` | 정상·네거티브·실패·resume·권한 테스트 |
 
 ## 4. Gate 평가
 

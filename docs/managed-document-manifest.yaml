@@ -15,7 +15,7 @@ scope:
   purpose: Common metadata envelope for repository-managed Markdown
   classification: public
 governance:
-  owner: polargomz
+  owner: D. JEONG
   producer: maintainer
   approvers:
     - maintainer
@@ -24,8 +24,8 @@ governance:
   custodian: repository
 time:
   created_at: 2026-08-03T00:00:00+09:00
-  observed_at: 2026-08-03T00:00:00+09:00
-  updated_at: 2026-08-03T00:00:00+09:00
+  observed_at: 2026-08-03T08:30:05+09:00
+  updated_at: 2026-08-03T08:30:05+09:00
   effective_at: 2026-08-03T00:00:00+09:00
 provenance:
   source_refs:
@@ -43,7 +43,7 @@ validation:
   status: pass
   validator_id: trace-gate.managed-documents
   validator_version: "1.1.0"
-  validated_at: 2026-08-03T00:00:00+09:00
+  validated_at: 2026-08-03T08:30:05+09:00
   warnings: 0
   failures: 0
 lineage:
@@ -59,7 +59,7 @@ storage:
 freshness:
   mode: event_driven
   status: current
-  evaluated_at: 2026-08-03T00:00:00+09:00
+  evaluated_at: 2026-08-03T08:30:05+09:00
   reason: Registered documents are verified against canonical repository content
 access:
   sensitivity: public
@@ -78,7 +78,7 @@ documents:
   - identity:
       artifact_id: DOC.TRACE-GATE.README
       artifact_type: markdown_document
-      revision_id: REV.SHA256.39672c7d2e332aaf
+      revision_id: REV.SHA256.b4896d1dc30dfb5c
       schema_version: "0.2.0"
     scope:
       system: trace-gate-framework
@@ -87,15 +87,15 @@ documents:
       purpose: Repository entry point and adoption guide
       classification: public
     governance:
-      owner: polargomz
+      owner: D. JEONG
       producer: maintainer
       approvers: [maintainer]
       validators: [trace-gate.managed-documents]
       custodian: repository
     time:
       created_at: null
-      observed_at: 2026-08-03T00:00:00+09:00
-      updated_at: 2026-08-03T00:00:00+09:00
+      observed_at: 2026-08-03T08:30:05+09:00
+      updated_at: 2026-08-03T08:30:05+09:00
       effective_at: 2026-08-03T00:00:00+09:00
     provenance:
       source_refs: [README.md]
@@ -105,14 +105,14 @@ documents:
       tool_version: trace-gate-framework/1.1.0
     integrity:
       algorithm: sha256
-      sha256: 39672c7d2e332aaf635c35a4217fb939eaf3d99f79d4964f73912f7fdafa1950
-      size_bytes: 6189
+      sha256: b4896d1dc30dfb5cf1e13c7e35f7ec53feb59d6effe65cf79f305221897db2a8
+      size_bytes: 6188
       signature_status: not_configured
     validation:
       status: pass
       validator_id: trace-gate.managed-documents
       validator_version: "1.1.0"
-      validated_at: 2026-08-03T00:00:00+09:00
+      validated_at: 2026-08-03T08:30:05+09:00
       warnings: 0
       failures: 0
     lineage:
@@ -128,7 +128,7 @@ documents:
     freshness:
       mode: event_driven
       status: current
-      evaluated_at: 2026-08-03T00:00:00+09:00
+      evaluated_at: 2026-08-03T08:30:05+09:00
       reason: content digest and size match the canonical file
     access:
       sensitivity: public
@@ -138,7 +138,7 @@ documents:
   - identity:
       artifact_id: DOC.TRACE-GATE.CONTRIBUTING
       artifact_type: markdown_document
-      revision_id: REV.SHA256.7b77faeb85e57906
+      revision_id: REV.SHA256.35f5a9771266aeee
       schema_version: "0.2.0"
     scope:
       system: trace-gate-framework
@@ -147,15 +147,15 @@ documents:
       purpose: Public contribution contract
       classification: public
     governance:
-      owner: polargomz
+      owner: D. JEONG
       producer: maintainer
       approvers: [maintainer]
       validators: [trace-gate.managed-documents]
       custodian: repository
     time:
       created_at: null
-      observed_at: 2026-08-03T00:00:00+09:00
-      updated_at: 2026-08-03T00:00:00+09:00
+      observed_at: 2026-08-03T08:30:05+09:00
+      updated_at: 2026-08-03T08:30:05+09:00
       effective_at: 2026-08-03T00:00:00+09:00
     provenance:
       source_refs: [CONTRIBUTING.md]
@@ -165,14 +165,14 @@ documents:
       tool_version: trace-gate-framework/1.1.0
     integrity:
       algorithm: sha256
-      sha256: 7b77faeb85e57906db6afbed82c0bf855b0c1cd582afc6a39a10a605ab591e7b
-      size_bytes: 2505
+      sha256: 35f5a9771266aeeed5fd90de5a44c6340cdcf24ae112d7e08c44c74fb992ba1c
+      size_bytes: 2511
       signature_status: not_configured
     validation:
       status: pass
       validator_id: trace-gate.managed-documents
       validator_version: "1.1.0"
-      validated_at: 2026-08-03T00:00:00+09:00
+      validated_at: 2026-08-03T08:30:05+09:00
       warnings: 0
       failures: 0
     lineage:
@@ -188,7 +188,7 @@ documents:
     freshness:
       mode: event_driven
       status: current
-      evaluated_at: 2026-08-03T00:00:00+09:00
+      evaluated_at: 2026-08-03T08:30:05+09:00
       reason: content digest and size match the canonical file
     access:
       sensitivity: public
@@ -198,7 +198,7 @@ documents:
   - identity:
       artifact_id: DOC.TRACE-GATE.CHANGELOG
       artifact_type: markdown_document
-      revision_id: REV.SHA256.5e08f8d94e448651
+      revision_id: REV.SHA256.2a20c4e76f07ba22
       schema_version: "0.2.0"
     scope:
       system: trace-gate-framework
@@ -207,15 +207,15 @@ documents:
       purpose: Public version history
       classification: public
     governance:
-      owner: polargomz
+      owner: D. JEONG
       producer: maintainer
       approvers: [maintainer]
       validators: [trace-gate.managed-documents]
       custodian: repository
     time:
       created_at: null
-      observed_at: 2026-08-03T00:00:00+09:00
-      updated_at: 2026-08-03T00:00:00+09:00
+      observed_at: 2026-08-03T08:30:05+09:00
+      updated_at: 2026-08-03T08:30:05+09:00
       effective_at: 2026-08-03T00:00:00+09:00
     provenance:
       source_refs: [CHANGELOG.md]
@@ -225,14 +225,14 @@ documents:
       tool_version: trace-gate-framework/1.1.0
     integrity:
       algorithm: sha256
-      sha256: 5e08f8d94e4486512591f531a908f82d7eae30e7ba4c7197172e96115818d0b8
-      size_bytes: 1381
+      sha256: 2a20c4e76f07ba2208d16ef962af2a340ee1baf3db9040a752b3fd7625014c8a
+      size_bytes: 1387
       signature_status: not_configured
     validation:
       status: pass
       validator_id: trace-gate.managed-documents
       validator_version: "1.1.0"
-      validated_at: 2026-08-03T00:00:00+09:00
+      validated_at: 2026-08-03T08:30:05+09:00
       warnings: 0
       failures: 0
     lineage:
@@ -248,7 +248,7 @@ documents:
     freshness:
       mode: event_driven
       status: current
-      evaluated_at: 2026-08-03T00:00:00+09:00
+      evaluated_at: 2026-08-03T08:30:05+09:00
       reason: content digest and size match the canonical file
     access:
       sensitivity: public
@@ -258,7 +258,7 @@ documents:
   - identity:
       artifact_id: DOC.TRACE-GATE.CORE.KO
       artifact_type: markdown_document
-      revision_id: REV.SHA256.43db1c4ca5872d95
+      revision_id: REV.SHA256.62fb1a365a8db122
       schema_version: "0.2.0"
     scope:
       system: trace-gate-framework
@@ -267,15 +267,15 @@ documents:
       purpose: Normative TRACE Gate Framework specification
       classification: public
     governance:
-      owner: polargomz
+      owner: D. JEONG
       producer: maintainer
       approvers: [maintainer]
       validators: [trace-gate.managed-documents]
       custodian: repository
     time:
       created_at: null
-      observed_at: 2026-08-03T00:00:00+09:00
-      updated_at: 2026-08-03T00:00:00+09:00
+      observed_at: 2026-08-03T08:30:05+09:00
+      updated_at: 2026-08-03T08:30:05+09:00
       effective_at: 2026-08-03T00:00:00+09:00
     provenance:
       source_refs: [docs/TRACE-GATE-FRAMEWORK.ko.md]
@@ -285,14 +285,14 @@ documents:
       tool_version: trace-gate-framework/1.1.0
     integrity:
       algorithm: sha256
-      sha256: 43db1c4ca5872d95d91561efd1b63334ac1e9cc0662dc2a07769f5d922e71a26
-      size_bytes: 31179
+      sha256: 62fb1a365a8db122c8c30031ec63aa228a08ae9d6537aa60894cefc9d72304d3
+      size_bytes: 31177
       signature_status: not_configured
     validation:
       status: pass
       validator_id: trace-gate.managed-documents
       validator_version: "1.1.0"
-      validated_at: 2026-08-03T00:00:00+09:00
+      validated_at: 2026-08-03T08:30:05+09:00
       warnings: 0
       failures: 0
     lineage:
@@ -308,7 +308,7 @@ documents:
     freshness:
       mode: event_driven
       status: current
-      evaluated_at: 2026-08-03T00:00:00+09:00
+      evaluated_at: 2026-08-03T08:30:05+09:00
       reason: content digest and size match the canonical file
     access:
       sensitivity: public
@@ -318,7 +318,7 @@ documents:
   - identity:
       artifact_id: DOC.TRACE-GATE.REFERENCE.KO
       artifact_type: markdown_document
-      revision_id: REV.SHA256.aeb966328b9ab572
+      revision_id: REV.SHA256.abde77148d122e84
       schema_version: "0.2.0"
     scope:
       system: trace-gate-framework
@@ -327,15 +327,15 @@ documents:
       purpose: Public implementation and validation guide
       classification: public
     governance:
-      owner: polargomz
+      owner: D. JEONG
       producer: maintainer
       approvers: [maintainer]
       validators: [trace-gate.managed-documents]
       custodian: repository
     time:
       created_at: null
-      observed_at: 2026-08-03T00:00:00+09:00
-      updated_at: 2026-08-03T00:00:00+09:00
+      observed_at: 2026-08-03T08:30:05+09:00
+      updated_at: 2026-08-03T08:30:05+09:00
       effective_at: 2026-08-03T00:00:00+09:00
     provenance:
       source_refs: [docs/REFERENCE-IMPLEMENTATION.ko.md]
@@ -345,14 +345,14 @@ documents:
       tool_version: trace-gate-framework/1.1.0
     integrity:
       algorithm: sha256
-      sha256: aeb966328b9ab572a58a21e0c6aa66f5200f99771e0ecf8b10f2978a99932509
-      size_bytes: 6459
+      sha256: abde77148d122e84b5ab393af088222df5cb522517d63165f611cab9a9e95576
+      size_bytes: 6465
       signature_status: not_configured
     validation:
       status: pass
       validator_id: trace-gate.managed-documents
       validator_version: "1.1.0"
-      validated_at: 2026-08-03T00:00:00+09:00
+      validated_at: 2026-08-03T08:30:05+09:00
       warnings: 0
       failures: 0
     lineage:
@@ -368,7 +368,7 @@ documents:
     freshness:
       mode: event_driven
       status: current
-      evaluated_at: 2026-08-03T00:00:00+09:00
+      evaluated_at: 2026-08-03T08:30:05+09:00
       reason: content digest and size match the canonical file
     access:
       sensitivity: public
@@ -378,7 +378,7 @@ documents:
   - identity:
       artifact_id: DOC.TRACE-GATE.SUBFRAMEWORK.DM.KO
       artifact_type: markdown_document
-      revision_id: REV.SHA256.3daf72c6e0ba42d2
+      revision_id: REV.SHA256.0d22c25e358e0d22
       schema_version: "0.2.0"
     scope:
       system: trace-gate-framework
@@ -387,15 +387,15 @@ documents:
       purpose: Normative TRACE Document Management specification
       classification: public
     governance:
-      owner: polargomz
+      owner: D. JEONG
       producer: maintainer
       approvers: [maintainer]
       validators: [trace-gate.managed-documents]
       custodian: repository
     time:
       created_at: null
-      observed_at: 2026-08-03T00:00:00+09:00
-      updated_at: 2026-08-03T00:00:00+09:00
+      observed_at: 2026-08-03T08:30:05+09:00
+      updated_at: 2026-08-03T08:30:05+09:00
       effective_at: 2026-08-03T00:00:00+09:00
     provenance:
       source_refs: [docs/subframeworks/TRACE-DOCUMENT-MANAGEMENT.ko.md]
@@ -405,14 +405,14 @@ documents:
       tool_version: trace-gate-framework/1.1.0
     integrity:
       algorithm: sha256
-      sha256: 3daf72c6e0ba42d27370c76bb28a30846dbd2a4c3e4d5d2a646caa1546a8eb74
-      size_bytes: 41997
+      sha256: 0d22c25e358e0d226b045bd2f5d01ae770e05357cf1e3349dfdd0d6fc808de1c
+      size_bytes: 42013
       signature_status: not_configured
     validation:
       status: pass
       validator_id: trace-gate.managed-documents
       validator_version: "1.1.0"
-      validated_at: 2026-08-03T00:00:00+09:00
+      validated_at: 2026-08-03T08:30:05+09:00
       warnings: 0
       failures: 0
     lineage:
@@ -428,7 +428,7 @@ documents:
     freshness:
       mode: event_driven
       status: current
-      evaluated_at: 2026-08-03T00:00:00+09:00
+      evaluated_at: 2026-08-03T08:30:05+09:00
       reason: content digest and size match the canonical file
     access:
       sensitivity: public
@@ -438,7 +438,7 @@ documents:
   - identity:
       artifact_id: DOC.TRACE-GATE.SUBFRAMEWORK.AH.KO
       artifact_type: markdown_document
-      revision_id: REV.SHA256.e44ada4a4f21bc8f
+      revision_id: REV.SHA256.5e01e804ca0bb17c
       schema_version: "0.2.0"
     scope:
       system: trace-gate-framework
@@ -447,15 +447,15 @@ documents:
       purpose: Normative TRACE Agent Harness specification
       classification: public
     governance:
-      owner: polargomz
+      owner: D. JEONG
       producer: maintainer
       approvers: [maintainer]
       validators: [trace-gate.managed-documents]
       custodian: repository
     time:
       created_at: null
-      observed_at: 2026-08-03T00:00:00+09:00
-      updated_at: 2026-08-03T00:00:00+09:00
+      observed_at: 2026-08-03T08:30:05+09:00
+      updated_at: 2026-08-03T08:30:05+09:00
       effective_at: 2026-08-03T00:00:00+09:00
     provenance:
       source_refs: [docs/subframeworks/TRACE-AGENT-HARNESS.ko.md]
@@ -465,14 +465,14 @@ documents:
       tool_version: trace-gate-framework/1.1.0
     integrity:
       algorithm: sha256
-      sha256: e44ada4a4f21bc8f51259215b850787a2a479012e502269fb0a8ca6cb1c795e6
-      size_bytes: 12365
+      sha256: 5e01e804ca0bb17c39ef281b8a28d9dcd8de0bcdf252ba578d68c57787158c11
+      size_bytes: 12372
       signature_status: not_configured
     validation:
       status: pass
       validator_id: trace-gate.managed-documents
       validator_version: "1.1.0"
-      validated_at: 2026-08-03T00:00:00+09:00
+      validated_at: 2026-08-03T08:30:05+09:00
       warnings: 0
       failures: 0
     lineage:
@@ -488,7 +488,7 @@ documents:
     freshness:
       mode: event_driven
       status: current
-      evaluated_at: 2026-08-03T00:00:00+09:00
+      evaluated_at: 2026-08-03T08:30:05+09:00
       reason: content digest and size match the canonical file
     access:
       sensitivity: public
@@ -507,7 +507,7 @@ documents:
       purpose: Public reference examples
       classification: public
     governance:
-      owner: polargomz
+      owner: D. JEONG
       producer: maintainer
       approvers: [maintainer]
       validators: [trace-gate.managed-documents]
@@ -567,7 +567,7 @@ documents:
       purpose: Reusable session handoff template
       classification: public
     governance:
-      owner: polargomz
+      owner: D. JEONG
       producer: maintainer
       approvers: [maintainer]
       validators: [trace-gate.managed-documents]

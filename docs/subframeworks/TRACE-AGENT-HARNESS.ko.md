@@ -238,7 +238,7 @@ Subagent Task Contract는 다음을 고정한다.
 | `TRACE-AH-L0 Contracted` | Run Envelope, typed action, tool registry |
 | `TRACE-AH-L1 Governed` | authorization enforcement, budgets, append-only observations |
 | `TRACE-AH-L2 Durable` | checkpoint/resume, idempotency, failure preservation |
-| `TRACE-AH-L3 Verified` | verifier loop, deterministic Gate evaluator, CI negative tests |
+| `TRACE-AH-L3 Verified` | verifier loop, deterministic Gate evaluator, CI 네거티브 테스트 |
 | `TRACE-AH-L4 Coordinated` | bounded subagent, writer lease, cancellation과 conflict-safe merge |
 
 상위 수준은 하위 수준을 모두 포함한다. Multi-agent가 필요 없는 구현은 L3를 완전 적합성 목표로 사용할 수 있으며 L4를 주장할 필요가 없다.
@@ -270,4 +270,4 @@ Subagent Task Contract는 다음을 고정한다.
 
 ## 라이선스
 
-Copyright © 2026 polargomz. CC BY 4.0에 따라 제공된다.
+Copyright © 2026 D. JEONG. CC BY 4.0에 따라 제공된다.

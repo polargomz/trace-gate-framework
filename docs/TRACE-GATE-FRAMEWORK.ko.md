@@ -4,7 +4,7 @@
 
 - 버전: 1.1.0
 - 언어: 한국어
-- 저작자: polargomz
+- 저작자: D. JEONG
 - 라이선스: [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/)
 - 적용 대상: 일반 소프트웨어 개발, 인프라 이전, 데이터 파이프라인, 자동화 시스템, AI 에이전트 기반 개발
 - 핵심 목표: **빠르게 진행하되, 권한·데이터·운영 안정성을 잃지 않고 실제 기능을 단계적으로 이전한다.**
@@ -983,6 +983,6 @@ TRACE Gate Framework의 최종 원칙은 단순하다.
 
 ## 라이선스
 
-Copyright © 2026 polargomz.
+Copyright © 2026 D. JEONG.
 
 이 문서는 [Creative Commons Attribution 4.0 International](https://creativecommons.org/licenses/by/4.0/)에 따라 제공됩니다. 공유하거나 수정한 자료를 배포할 때는 적절한 저작자 표시와 라이선스 링크를 제공하고, 변경 사실을 밝혀야 합니다.

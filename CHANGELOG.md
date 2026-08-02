@@ -6,7 +6,7 @@
 
 - TRACE Agent Harness Subframework `0.1.0`
 - TRACE core, TRACE-DM와 TRACE-AH 통합 JSON Schema
-- semantic validator와 fail-closed 음성 테스트
+- semantic validator와 fail-closed 네거티브 테스트
 - deterministic Gate evaluator, input digest와 receipt digest
 - TRACE-DM context selector와 provider-neutral Prompt Envelope
 - typed model/tool/verifier Run Kernel
