@@ -31,6 +31,8 @@ CI는 같은 검증을 Python 3.12에서 수행한다.
 | `src/trace_gate/gates.py` | 결정적 Gate evaluator와 receipt digest |
 | `src/trace_gate/context.py` | 목적 기반 context selection과 prompt envelope |
 | `src/trace_gate/semantic.py` | 선택 그룹 semantic candidate의 provenance·권한·freshness 검증 |
+| `docs/managed-document-manifest.yaml` | 모든 Markdown의 공통 metadata partition manifest |
+| `scripts/update_document_manifest.py` | 문서 revision·SHA-256·size·freshness 갱신 |
 | `src/trace_gate/runtime.py` | bounded model/tool/verifier loop와 checkpoint |
 | `src/trace_gate/multi_agent.py` | writer lease, cancellation과 merge conflict 검사 |
 | `templates/` | 구현자가 채워야 할 계약 예제 |
@@ -115,5 +117,11 @@ Evaluator는 다음을 보장한다.
 - Python handler timeout은 실행 후 측정하는 참조 동작이며, 운영 executor는 실제 강제 timeout과 process 격리를 제공해야 한다.
 - model adapter의 prompt token 계산은 provider adapter 책임이다. TRACE 공통층은 byte budget과 provenance를 보존한다.
 - 참조 구현은 embedding 생성이나 ANN index를 제공하지 않는다. model과 index backend는 group profile 계약을 지키는 adapter로 연결한다.
+
+## 8.1 관리 문서 Metadata
+
+게시용 Markdown에는 반복적인 front matter를 삽입하지 않는다. 대신 TRACE-DM 8항이 허용하는 partition manifest에 문서별 Identity, Scope, Governance, Time, Provenance, Integrity, Validation, Lineage, Storage, Freshness와 Access를 등록한다.
+
+Validator는 repository에서 Markdown을 직접 발견해 manifest coverage와 content-derived revision을 대조한다. Manifest 자체는 자기 hash를 포함하지 않으며 등록한 문서만 SHA-256과 size를 가진다.
 
 이 제한은 권한을 넓혀 우회하지 않고 구현별 Evidence와 Unknown으로 기록한다.

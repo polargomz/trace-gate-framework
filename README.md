@@ -30,6 +30,7 @@ flowchart LR
 - [TRACE Document Management Subframework](docs/subframeworks/TRACE-DOCUMENT-MANAGEMENT.ko.md): 문서 정본·계보, 목적 기반 접근과 선택적 그룹 embedding
 - [TRACE Agent Harness Subframework](docs/subframeworks/TRACE-AGENT-HARNESS.ko.md): model·tool·verification·checkpoint와 선택적 multi-agent 계약
 - [참조 구현 사용 가이드](docs/REFERENCE-IMPLEMENTATION.ko.md)
+- [관리 문서 메타데이터 Manifest](docs/managed-document-manifest.yaml): 저장소 Markdown의 identity·hash·lineage·freshness·access envelope
 - [변경 기록](CHANGELOG.md)
 - [기여 가이드](CONTRIBUTING.md)
 
@@ -101,6 +102,12 @@ python3 -m venv .venv
 ```
 
 검증기는 YAML 중복 key, JSON Schema, 목적·민감도·tool risk·writer 경계의 semantic invariant를 확인합니다. Gate evaluator는 증적에서 status와 digest receipt를 계산합니다.
+
+저장소의 모든 Markdown은 TRACE-DM 공통 metadata envelope를 partition manifest로 제공하며, 누락 문서·content hash·size·revision drift는 같은 검증에서 실패합니다. 문서를 변경한 뒤에는 다음 명령으로 content-derived field를 갱신합니다.
+
+```bash
+.venv/bin/python scripts/update_document_manifest.py
+```
 
 ```bash
 .venv/bin/python scripts/evaluate_gate.py \

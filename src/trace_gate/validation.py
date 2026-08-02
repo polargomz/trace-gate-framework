@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 from pathlib import Path
 from typing import Any
@@ -14,6 +15,7 @@ import yaml
 ROOT = Path(__file__).resolve().parents[2]
 SCHEMA_PATH = ROOT / "schemas" / "trace-gate.schema.json"
 TEMPLATE_DIR = ROOT / "templates"
+MANAGED_DOCUMENT_MANIFEST = ROOT / "docs" / "managed-document-manifest.yaml"
 
 TEMPLATE_SCHEMAS = {
     "request-receipt.yaml": "requestReceipt",
@@ -29,6 +31,10 @@ TEMPLATE_SCHEMAS = {
     "agent-run.yaml": "agentRun",
     "tool-definition.yaml": "toolDefinition",
     "subagent-task.yaml": "subagentTask",
+}
+SCHEMA_MAPPINGS = {
+    **TEMPLATE_SCHEMAS,
+    "managed-document-manifest.yaml": "managedDocumentManifest",
 }
 
 
@@ -212,7 +218,7 @@ def semantic_errors(name: str, value: dict[str, Any]) -> list[str]:
 
 
 def validate_value(name: str, value: dict[str, Any]) -> None:
-    schema_name = TEMPLATE_SCHEMAS.get(name)
+    schema_name = SCHEMA_MAPPINGS.get(name)
     if schema_name is None:
         raise ValueError(f"no schema mapping for {name}")
     root_schema = load_schema()
@@ -239,17 +245,102 @@ def validate_templates(directory: Path = TEMPLATE_DIR) -> list[Path]:
     return paths
 
 
+def discover_managed_documents(root: Path, manifest: dict[str, Any]) -> list[Path]:
+    excluded = set(manifest["discovery"]["exclude_roots"])
+    discovered: set[Path] = set()
+    for pattern in manifest["discovery"]["include_patterns"]:
+        for path in root.rglob(pattern):
+            relative = path.relative_to(root)
+            if path.is_file() and not any(part in excluded for part in relative.parts):
+                discovered.add(relative)
+    return sorted(discovered)
+
+
+def managed_document_errors(value: dict[str, Any], root: Path) -> list[str]:
+    errors: list[str] = []
+    entries = value["documents"]
+    paths = [entry["storage"]["canonical_location"] for entry in entries]
+    artifact_ids = [entry["identity"]["artifact_id"] for entry in entries]
+    if len(paths) != len(set(paths)):
+        errors.append("managed document paths must be unique")
+    if len(artifact_ids) != len(set(artifact_ids)):
+        errors.append("managed document artifact ids must be unique")
+
+    discovered = {path.as_posix() for path in discover_managed_documents(root, value)}
+    registered = set(paths)
+    missing = sorted(discovered - registered)
+    extra = sorted(registered - discovered)
+    if missing:
+        errors.append(f"unregistered managed documents: {', '.join(missing)}")
+    if extra:
+        errors.append(f"registered documents are missing: {', '.join(extra)}")
+
+    for entry in entries:
+        relative = Path(entry["storage"]["canonical_location"])
+        if relative.is_absolute() or ".." in relative.parts:
+            errors.append(f"unsafe managed document path: {relative}")
+            continue
+        path = root / relative
+        if not path.is_file():
+            continue
+        content = path.read_bytes()
+        actual_hash = hashlib.sha256(content).hexdigest()
+        actual_size = len(content)
+        identity = entry["identity"]
+        integrity = entry["integrity"]
+        provenance = entry["provenance"]
+        expected_revision = f"REV.SHA256.{actual_hash[:16]}"
+        if integrity["sha256"] != actual_hash:
+            errors.append(f"{relative}: sha256 mismatch")
+        if integrity["size_bytes"] != actual_size:
+            errors.append(f"{relative}: size mismatch")
+        if identity["revision_id"] != expected_revision:
+            errors.append(f"{relative}: revision id does not match content digest")
+        if relative.as_posix() not in provenance["source_refs"]:
+            errors.append(f"{relative}: provenance source_refs must include canonical path")
+        if entry["validation"]["status"] != "pass":
+            errors.append(f"{relative}: validation status must be pass")
+        if entry["freshness"]["status"] != "current":
+            errors.append(f"{relative}: freshness status must be current")
+        if entry["access"]["contains_secrets"]:
+            errors.append(f"{relative}: public managed documents cannot contain secrets")
+    return errors
+
+
+def validate_managed_documents(
+    manifest_path: Path = MANAGED_DOCUMENT_MANIFEST,
+    root: Path = ROOT,
+) -> list[Path]:
+    value = load_yaml(manifest_path)
+    validate_value(manifest_path.name, value)
+    errors = managed_document_errors(value, root)
+    if errors:
+        raise ValueError(f"{manifest_path.name}: " + "; ".join(errors))
+    return discover_managed_documents(root, value)
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("paths", nargs="*", type=Path)
     args = parser.parse_args(argv)
-    paths = args.paths or validate_templates()
     if args.paths:
-        for path in paths:
+        paths = args.paths
+        for path in args.paths:
             validate_path(path)
+        for path in paths:
+            print(f"PASS {path}")
+        print(f"TRACE contract validation passed: {len(paths)} files")
+        return 0
+
+    paths = validate_templates()
+    documents = validate_managed_documents()
     for path in paths:
         print(f"PASS {path}")
-    print(f"TRACE contract validation passed: {len(paths)} files")
+    print(f"PASS {MANAGED_DOCUMENT_MANIFEST}")
+    print(
+        "TRACE contract validation passed: "
+        f"{len(paths)} templates, {len(documents)} managed documents"
+    )
     return 0
 
 

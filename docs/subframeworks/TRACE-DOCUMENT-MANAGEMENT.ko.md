@@ -219,6 +219,8 @@ stateDiagram-v2
 
 Metadata는 모든 record에 중복하지 않고 ledger 또는 partition manifest에 둘 수 있다. 단, 레코드별로 다른 identity, event time, relation은 해당 레코드에 남겨야 한다.
 
+게시 문서의 가독성을 위해 여러 문서의 envelope를 하나의 partition manifest에 둘 수 있다. 이 경우 manifest는 관리 경로의 전체 문서를 발견하고 각 문서의 stable ID, canonical location, content digest와 freshness를 제공해야 한다. 새 문서가 manifest에 없거나 등록된 hash·size가 실제 파일과 다르면 fail closed로 판정한다. Partition manifest 자체에는 자기 전체 hash를 기록하지 않는다.
+
 ## 9. Trace 관계 모델
 
 표준 관계는 다음과 같다.
@@ -715,6 +717,7 @@ TRACE-DM의 정본 저장소는 [`polargomz/trace-gate-framework`](https://githu
 ```text
 trace-gate-framework/
 ├── docs/
+│   ├── managed-document-manifest.yaml
 │   ├── TRACE-GATE-FRAMEWORK.ko.md
 │   └── subframeworks/
 │       └── TRACE-DOCUMENT-MANAGEMENT.ko.md
@@ -737,6 +740,7 @@ TRACE-DM 배포 단위는 다음을 함께 제공해야 한다.
 5. access intent, manifest, read profile, 선택적 embedding profile·manifest와 GateReceipt 템플릿을 제공한다.
 6. Markdown·Mermaid·내부 link와 secret·내부 경로 부재를 검증한다.
 7. 호환되는 TRACE core 버전 범위를 명시하고 core 의미를 바꾸는 변경은 별도 버전 판단으로 분리한다.
+8. 저장소 관리 문서는 공통 metadata envelope 또는 검증 가능한 partition manifest에 등록한다.
 
 TRACE core와 공유해야 하는 integration point:
 
