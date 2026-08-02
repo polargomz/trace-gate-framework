@@ -1,0 +1,51 @@
+schema_version: "0.1.0"
+subframework_id: TRACE-DM
+profile_id: document.lookup.default
+status: draft  # draft | active | superseded | deprecated
+
+applies_to:
+  purpose_classes:
+    - lookup
+  operations:
+    - read
+  artifact_types: []
+
+selection:
+  default_tiers:
+    - summary
+  optional_tiers:
+    - overview
+    - selected_records
+  full_history_allowed: false
+  raw_access_allowed: false
+  field_allowlist: []
+  field_denylist:
+    - secrets
+    - credentials
+
+limits:
+  maximum_sensitivity: internal
+  max_context_bytes: 30720
+  max_records: 100
+  max_age_seconds: 3600
+
+validation:
+  require_manifest: true
+  require_schema_valid: true
+  require_integrity_match: true
+  require_lineage_complete: true
+  require_freshness_current: true
+
+fallback:
+  on_missing_summary: selected_records
+  on_stale: blocked
+  on_hash_mismatch: blocked
+  on_unauthorized_field: allow_reduced
+
+escalation:
+  requires_new_review:
+    - purpose_change
+    - operation_change
+    - sensitivity_increase
+    - full_history_request
+    - raw_access_request

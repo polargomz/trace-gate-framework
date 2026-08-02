@@ -1,0 +1,34 @@
+schema_version: "0.1.0"
+subframework_id: TRACE-DM
+access_intent_id: ACCESS.YYYYMMDD.HHMM.SHORT.NAME
+trace_id: TRACE.YYYYMMDD.HHMM.SHORT.NAME
+request_id: REQ.YYYYMMDD.HHMM.SHORT.NAME
+submitted_at: 2026-01-01T09:00:00+09:00
+
+actor:
+  actor_id: actor-or-service-id
+  roles: []
+  interface_type: interactive  # interactive | cli | api | agent | batch
+
+purpose:
+  purpose_class: lookup  # lookup | decision_support | authoring | controlled_change | incident_response | audit_reconstruction
+  declared_purpose: "접근이 필요한 구체적인 이유"
+  operation: read  # read | create | revise | publish | archive | restore | dispose
+
+targets:
+  artifact_ids: []
+  ledger_ids: []
+  time_range:
+    from: null
+    to: null
+
+authorization_refs: []
+
+constraints:
+  maximum_sensitivity: internal  # public | internal | confidential | restricted
+  freshness_requirement: current  # current | point_in_time | historical
+  context_budget_bytes: 30720
+  raw_access_requested: false
+  full_history_requested: false
+
+purpose_change_requires_new_review: true

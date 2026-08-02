@@ -1,0 +1,80 @@
+schema_version: "0.1.0"
+subframework_id: TRACE-DM
+manifest_id: DOC-MANIFEST.YYYYMMDD.HHMM.SHORT.NAME
+status: draft  # draft | active | superseded | archived | rejected | disposed
+
+identity:
+  artifact_id: DOC.SHORT.NAME
+  artifact_type: document
+  revision_id: REV.YYYYMMDD.HHMM
+  schema_ref: null
+  schema_version: null
+
+scope:
+  system: null
+  domain: null
+  purpose: null
+  classification: internal
+
+governance:
+  owner: null
+  producer: null
+  approvers: []
+  validators: []
+  custodian: null
+
+time:
+  created_at: 2026-01-01T09:00:00+09:00
+  updated_at: null
+  effective_at: null
+
+provenance:
+  source_refs: []
+  repository: null
+  commit: null
+  tool_version: null
+
+integrity:
+  algorithm: sha256
+  subjects:
+    - location: path-or-object-key
+      role: records  # records | summary | overview | schema | raw | replica | projection
+      sha256: null
+      size_bytes: null
+  signature_status: not_configured  # not_configured | unsigned | verified | failed
+
+lineage:
+  parent_artifact_ids: []
+  supersedes: []
+  relations: []
+  sequence: null
+
+storage:
+  canonical_location: null
+  replicas: []
+  retention_class: governance_ledger
+  legal_hold: false
+
+freshness:
+  mode: event_driven  # time_based | event_driven | schema_bound | immutable | generated
+  status: unknown  # current | stale | expired | not_applicable | unknown
+  evaluated_at: null
+  reason: ""
+
+access:
+  sensitivity: internal
+  contains_secrets: false
+  access_policy_ref: null
+
+tiers:
+  summary: null
+  overview: null
+  records: []
+
+validation:
+  status: pending  # pending | pass | warn | fail | legacy_indexed
+  validator_id: null
+  validator_version: null
+  validated_at: null
+  warnings: 0
+  failures: 0
