@@ -1,0 +1,42 @@
+schema_version: "0.2.0"
+subframework_id: TRACE-DM
+embedding_manifest_id: EMBED-MANIFEST.YYYYMMDD.HHMM.DOMAIN
+embedding_group_id: EMBED-GROUP.DOMAIN.ACTIVE-DOCS
+status: draft  # draft | active | stale | rejected | archived
+generated_at: 2026-01-01T09:00:00+09:00
+
+model:
+  model_id: embedding-model-id
+  model_version: "pinned-version"
+  dimensions: 1536
+  normalization: l2
+
+source_members:
+  - artifact_id: DOC.EXAMPLE.ONE
+    revision_id: REV.20260101.0900
+    source_digest: sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+    chunks:
+      - chunk_id: CHUNK.DOC.EXAMPLE.ONE.0001
+        content_digest: sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+        vector_digest: sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+
+index:
+  kind: flat
+  location: vector-store-or-object-reference
+  index_digest: sha256:dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd
+  record_count: 1
+  graph:
+    used: false
+    algorithm: null
+
+freshness:
+  status: current  # current | stale | expired | unknown
+  evaluated_at: 2026-01-01T09:01:00+09:00
+  reason: "source revision과 model version이 profile과 일치한다."
+
+validation:
+  status: pending  # pending | pass | warn | fail
+  validator_id: trace-dm.embedding-validator
+  validator_version: "0.2.0"
+  validated_at: null
+  failures: 0

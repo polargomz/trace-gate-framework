@@ -389,7 +389,7 @@ rollback rehearsal이 실행되지 않았다면 “rollback 준비 완료”로 
 
 #### TRACE-DM 하부 프레임
 
-[TRACE Document Management Subframework](subframeworks/TRACE-DOCUMENT-MANAGEMENT.ko.md)는 Context Rehydration, Evidence Chain과 Synchronized Truth를 문서 lifecycle에 적용한다. 문서 identity·revision·정본·projection을 분리하고, AI/LLM 접근 전에 목적·권한·민감도·freshness·context budget을 심사한다. TRACE core의 Request Receipt와 Explicit Authorization을 대체하지 않으며 문서 관련 세부 Gate 결과를 Evidence Chain에 반환한다.
+[TRACE Document Management Subframework](subframeworks/TRACE-DOCUMENT-MANAGEMENT.ko.md)는 Context Rehydration, Evidence Chain과 Synchronized Truth를 문서 lifecycle에 적용한다. 문서 identity·revision·정본·projection을 분리하고, AI/LLM 접근 전에 목적·권한·민감도·freshness·context budget을 심사한다. 필요한 객체 그룹에만 선택적 embedding projection을 적용할 수 있으며 vector graph를 전역 필수요소로 요구하지 않는다. TRACE core의 Request Receipt와 Explicit Authorization을 대체하지 않으며 문서 관련 세부 Gate 결과를 Evidence Chain에 반환한다.
 
 #### TRACE-AH 하부 프레임
 

@@ -1,4 +1,4 @@
-schema_version: "0.1.0"
+schema_version: "0.2.0"
 subframework_id: TRACE-DM
 receipt_id: TRACE.DM.RECEIPT.YYYYMMDD.HHMM.SHORT.NAME
 trace_id: TRACE.YYYYMMDD.HHMM.SHORT.NAME
@@ -40,6 +40,11 @@ access_plan:
   required_escalations: []
   context_budget_bytes: 30720
   context_pack_ref: null
+  semantic_retrieval:
+    status: not_requested  # not_requested | pass | reduced | blocked
+    embedding_group_ids: []
+    query_digest: null
+    candidate_refs: []
 
 evidence_refs: []
 expires_at: null

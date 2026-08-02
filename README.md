@@ -27,7 +27,7 @@ flowchart LR
 ## 문서
 
 - [TRACE Gate Framework 전체 문서](docs/TRACE-GATE-FRAMEWORK.ko.md)
-- [TRACE Document Management Subframework](docs/subframeworks/TRACE-DOCUMENT-MANAGEMENT.ko.md): 문서 정본·계보와 AI/LLM 목적 기반 사전 접근 선별
+- [TRACE Document Management Subframework](docs/subframeworks/TRACE-DOCUMENT-MANAGEMENT.ko.md): 문서 정본·계보, 목적 기반 접근과 선택적 그룹 embedding
 - [TRACE Agent Harness Subframework](docs/subframeworks/TRACE-AGENT-HARNESS.ko.md): model·tool·verification·checkpoint와 선택적 multi-agent 계약
 - [참조 구현 사용 가이드](docs/REFERENCE-IMPLEMENTATION.ko.md)
 - [변경 기록](CHANGELOG.md)
@@ -62,6 +62,8 @@ flowchart TB
 - `document-read-profile.yaml`: 목적별 최소 tier·context budget·확대 조건
 - `document-manifest.yaml`: 문서 revision·무결성·계보·freshness 계약
 - `document-gate-receipt.yaml`: 사전 접근 심사와 문서 Gate 판정 증적
+- `document-embedding-profile.yaml`: 선택 객체 그룹의 model·chunk·index·retrieval 정책
+- `document-embedding-manifest.yaml`: source revision·vector·index digest와 freshness 증적
 - `agent-run.yaml`: run context·budget·tool·verification 계약
 - `tool-definition.yaml`: tool effect·risk·schema·idempotency 계약
 - `subagent-task.yaml`: 제한된 하위 agent scope·lease·merge 계약
@@ -73,7 +75,7 @@ flowchart TB
 3. 기계적으로 판정 가능한 Gate
 4. 재현 가능한 Evidence
 
-AI/LLM이 문서에 접근하는 프로젝트는 TRACE-DM의 목적 기반 접근 판정을 적용합니다. Agent가 tool을 실행하는 프로젝트는 TRACE-AH의 typed action, scoped Tool Registry, append-only checkpoint와 verifier loop를 적용합니다.
+AI/LLM이 문서에 접근하는 프로젝트는 TRACE-DM의 목적 기반 접근 판정을 적용합니다. Semantic retrieval이 필요한 경우에만 선택한 객체 그룹에 embedding projection을 추가할 수 있으며, 별도 vector graph는 필수가 아닙니다. Agent가 tool을 실행하는 프로젝트는 TRACE-AH의 typed action, scoped Tool Registry, append-only checkpoint와 verifier loop를 적용합니다.
 
 ## 적용 대상
 
@@ -85,7 +87,7 @@ AI/LLM이 문서에 접근하는 프로젝트는 TRACE-DM의 목적 기반 접�
 
 ## 버전
 
-현재 TRACE core 문서 버전은 `1.1.0`입니다. TRACE-DM과 TRACE-AH는 각각 독립 버전을 가집니다.
+현재 TRACE core 문서 버전은 `1.1.0`입니다. TRACE-DM `0.2.0`과 TRACE-AH `0.1.0`은 각각 독립 버전을 가집니다.
 
 ## 템플릿 검증
 

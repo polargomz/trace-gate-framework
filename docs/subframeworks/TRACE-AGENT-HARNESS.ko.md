@@ -4,7 +4,7 @@
 - Version: `0.1.0`
 - Status: `proposed subframework specification with reference implementation`
 - Parent framework: TRACE Gate Framework `1.1.0`
-- Companion subframework: TRACE Document Management `0.1.0`
+- Companion subframework: TRACE Document Management `0.2.0`
 - Scope: AI agent의 문맥 조립, 모델 실행, tool 호출, 검증, checkpoint, 종료와 선택적 하위 agent 조정
 - Portability: 특정 모델, provider, SDK와 실행 화면에 비종속
 - License: CC BY 4.0
@@ -97,7 +97,7 @@ Run Envelope 변경은 기존 run을 소급 수정하지 않는다. 범위나 �
 
 ## 6. Context와 Prompt 조립
 
-TRACE-AH는 TRACE-DM이 `allow` 또는 명시된 `allow_reduced`로 판정한 Context Pack만 prompt에 포함한다. Summary는 원본 증적의 대체물이 아니지만, source digest와 freshness가 검증된 경우 탐색과 일반 의사결정의 기본 projection으로 사용할 수 있다. Full Records와 raw는 목적과 Gate가 요구할 때만 확대한다.
+TRACE-AH는 TRACE-DM이 `allow` 또는 명시된 `allow_reduced`로 판정한 Context Pack만 prompt에 포함한다. Summary는 원본 증적의 대체물이 아니지만, source digest와 freshness가 검증된 경우 탐색과 일반 의사결정의 기본 projection으로 사용할 수 있다. Semantic retrieval을 사용한 경우에도 candidate ID가 일반 DocumentManifest Gate를 통과한 뒤 선택된 content만 포함한다. Full Records와 raw는 목적과 Gate가 요구할 때만 확대한다.
 
 Prompt Envelope는 다음 계보를 보존한다.
 

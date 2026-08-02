@@ -1,4 +1,4 @@
-schema_version: "0.1.0"
+schema_version: "0.2.0"
 subframework_id: TRACE-DM
 access_intent_id: ACCESS.YYYYMMDD.HHMM.SHORT.NAME
 trace_id: TRACE.YYYYMMDD.HHMM.SHORT.NAME
@@ -21,6 +21,11 @@ targets:
   time_range:
     from: null
     to: null
+
+retrieval:
+  mode: exact  # exact | semantic | hybrid
+  embedding_group_ids: []
+  query_digest: null
 
 authorization_refs: []
 

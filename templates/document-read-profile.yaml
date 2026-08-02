@@ -1,4 +1,4 @@
-schema_version: "0.1.0"
+schema_version: "0.2.0"
 subframework_id: TRACE-DM
 profile_id: document.lookup.default
 status: draft  # draft | active | superseded | deprecated
@@ -22,6 +22,14 @@ selection:
   field_denylist:
     - secrets
     - credentials
+
+semantic_retrieval:
+  mode: disabled  # disabled | optional | required
+  allowed_group_ids: []
+  max_candidates: 20
+  minimum_score: 0.75
+  allow_cross_group: false
+  exact_fallback: true
 
 limits:
   maximum_sensitivity: internal
@@ -49,3 +57,5 @@ escalation:
     - sensitivity_increase
     - full_history_request
     - raw_access_request
+    - semantic_group_expansion
+    - semantic_cross_group_request

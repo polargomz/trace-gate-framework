@@ -14,6 +14,8 @@
 - append-only JSONL checkpoint와 resume
 - bounded subagent scope, writer lease, cancellation과 conflict-safe merge
 - GitHub Actions conformance workflow와 실행 예제
+- TRACE-DM `0.2.0`의 선택적 객체 그룹 embedding과 governed semantic retrieval
+- 그룹별 flat·graph·provider-managed index 선택 계약
 
 ### Changed
 

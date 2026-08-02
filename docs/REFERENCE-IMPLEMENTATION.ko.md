@@ -30,6 +30,7 @@ CI는 같은 검증을 Python 3.12에서 수행한다.
 | `src/trace_gate/validation.py` | 중복 key, JSON Schema와 semantic validator |
 | `src/trace_gate/gates.py` | 결정적 Gate evaluator와 receipt digest |
 | `src/trace_gate/context.py` | 목적 기반 context selection과 prompt envelope |
+| `src/trace_gate/semantic.py` | 선택 그룹 semantic candidate의 provenance·권한·freshness 검증 |
 | `src/trace_gate/runtime.py` | bounded model/tool/verifier loop와 checkpoint |
 | `src/trace_gate/multi_agent.py` | writer lease, cancellation과 merge conflict 검사 |
 | `templates/` | 구현자가 채워야 할 계약 예제 |
@@ -93,6 +94,19 @@ Evaluator는 다음을 보장한다.
 
 동일 artifact path에 다른 digest가 제출되면 merge 결과는 `blocked`다. LLM judge가 임의로 하나를 선택하게 해서는 안 된다.
 
+## 7.1 선택적 Semantic Retrieval
+
+`select_semantic_candidates`는 embedding provider나 vector database를 구현하지 않는다. 외부 검색기가 반환한 candidate를 다음 순서로 검증한다.
+
+- Access Intent가 `semantic` 또는 `hybrid` mode와 group을 요청했는지 확인
+- ReadProfile과 EmbeddingProfile이 같은 group·purpose를 허용하는지 확인
+- EmbeddingManifest의 model contract, validation과 freshness 확인
+- candidate의 artifact revision과 chunk가 index manifest에 존재하는지 확인
+- 현재 DocumentManifest의 revision, sensitivity, secret와 group membership 재검증
+- score threshold와 candidate budget 적용
+
+결과는 content가 아니라 artifact·revision·chunk identity와 provenance만 반환한다. 이후 일반 `select_context`가 허용 tier의 실제 문맥을 선택한다. `exact` mode는 embedding 구성요소 없이 그대로 동작한다.
+
 ## 8. 알려진 제한
 
 - cryptographic signature는 필드와 lifecycle만 정의하며 signer를 포함하지 않는다.
@@ -100,5 +114,6 @@ Evaluator는 다음을 보장한다.
 - 단일 프로세스 mutation lock은 분산 single-writer를 보장하지 않는다.
 - Python handler timeout은 실행 후 측정하는 참조 동작이며, 운영 executor는 실제 강제 timeout과 process 격리를 제공해야 한다.
 - model adapter의 prompt token 계산은 provider adapter 책임이다. TRACE 공통층은 byte budget과 provenance를 보존한다.
+- 참조 구현은 embedding 생성이나 ANN index를 제공하지 않는다. model과 index backend는 group profile 계약을 지키는 adapter로 연결한다.
 
 이 제한은 권한을 넓혀 우회하지 않고 구현별 Evidence와 Unknown으로 기록한다.

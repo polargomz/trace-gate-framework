@@ -21,6 +21,8 @@ TEMPLATE_SCHEMAS = {
     "evidence-manifest.yaml": "evidenceManifest",
     "gate-decision.yaml": "gateDecision",
     "document-access-intent.yaml": "documentAccessIntent",
+    "document-embedding-profile.yaml": "documentEmbeddingProfile",
+    "document-embedding-manifest.yaml": "documentEmbeddingManifest",
     "document-manifest.yaml": "documentManifest",
     "document-read-profile.yaml": "documentReadProfile",
     "document-gate-receipt.yaml": "documentGateReceipt",
@@ -89,6 +91,7 @@ def semantic_errors(name: str, value: dict[str, Any]) -> list[str]:
     if name == "document-access-intent.yaml":
         purpose = value["purpose"]["purpose_class"]
         constraints = value["constraints"]
+        retrieval = value.get("retrieval", {"mode": "exact", "embedding_group_ids": []})
         if constraints.get("raw_access_requested") and purpose not in {
             "incident_response",
             "audit_reconstruction",
@@ -96,15 +99,29 @@ def semantic_errors(name: str, value: dict[str, Any]) -> list[str]:
             errors.append("raw access requires incident_response or audit_reconstruction")
         if constraints.get("full_history_requested") and purpose != "audit_reconstruction":
             errors.append("full history requires audit_reconstruction")
+        if retrieval["mode"] == "exact" and retrieval["embedding_group_ids"]:
+            errors.append("exact retrieval cannot request embedding groups")
+        if retrieval["mode"] in {"semantic", "hybrid"}:
+            if not retrieval["embedding_group_ids"]:
+                errors.append("semantic or hybrid retrieval requires embedding groups")
+            if not retrieval.get("query_digest"):
+                errors.append("semantic or hybrid retrieval requires a query digest")
 
     if name == "document-read-profile.yaml":
         selection = value["selection"]
         purposes = set(value["applies_to"].get("purpose_classes", []))
+        semantic = value.get("semantic_retrieval", {"mode": "disabled", "allowed_group_ids": []})
         if selection.get("raw_access_allowed") and not purposes <= {
             "incident_response",
             "audit_reconstruction",
         }:
             errors.append("raw-enabled profiles may only serve incident or audit purposes")
+        if semantic["mode"] == "disabled" and semantic["allowed_group_ids"]:
+            errors.append("disabled semantic retrieval cannot allow embedding groups")
+        if semantic["mode"] != "disabled" and not semantic["allowed_group_ids"]:
+            errors.append("enabled semantic retrieval requires allowed embedding groups")
+        if semantic.get("allow_cross_group") and len(semantic["allowed_group_ids"]) < 2:
+            errors.append("cross-group retrieval requires at least two allowed groups")
 
     if name == "document-manifest.yaml":
         subjects = value["integrity"].get("subjects", [])
@@ -113,6 +130,59 @@ def semantic_errors(name: str, value: dict[str, Any]) -> list[str]:
             errors.append("integrity subjects must have unique locations")
         if value["access"].get("contains_secrets") and value["tiers"].get("summary"):
             errors.append("secret-bearing manifests cannot publish a normal summary")
+        semantic = value.get("semantic_projection")
+        if semantic:
+            if semantic["eligible"] and not semantic["group_memberships"]:
+                errors.append("embedding-eligible documents require a group membership")
+            if not semantic["eligible"] and (
+                semantic["group_memberships"] or semantic["embedding_manifest_refs"]
+            ):
+                errors.append("ineligible documents cannot retain embedding memberships or refs")
+
+    if name == "document-embedding-profile.yaml":
+        scope = value["scope"]
+        if scope["membership_mode"] == "explicit" and not scope["include_artifact_ids"]:
+            errors.append("explicit embedding groups require artifact ids")
+        if scope["membership_mode"] == "selector" and not (
+            scope["include_artifact_types"] or scope["include_tags"]
+        ):
+            errors.append("selector embedding groups require artifact types or tags")
+        overlap = set(scope["include_artifact_ids"]) & set(scope["exclude_artifact_ids"])
+        if overlap:
+            errors.append(f"embedding group includes and excludes the same artifacts: {sorted(overlap)}")
+        index = value["index"]
+        if index["kind"] == "graph":
+            if not index.get("graph") or not index["graph"].get("algorithm"):
+                errors.append("graph indexes require an algorithm")
+        elif index.get("graph") is not None:
+            errors.append("non-graph indexes cannot define graph configuration")
+        excluded = set(value["source_selection"]["exclude_fields"])
+        if not {"secrets", "credentials"} <= excluded:
+            errors.append("embedding profiles must exclude secrets and credentials")
+
+    if name == "document-embedding-manifest.yaml":
+        members = value["source_members"]
+        member_keys = [(member["artifact_id"], member["revision_id"]) for member in members]
+        if len(member_keys) != len(set(member_keys)):
+            errors.append("embedding source members must be unique by artifact and revision")
+        chunk_ids = [chunk["chunk_id"] for member in members for chunk in member["chunks"]]
+        if len(chunk_ids) != len(set(chunk_ids)):
+            errors.append("embedding chunk ids must be unique")
+        graph = value["index"].get("graph", {})
+        if graph.get("used") and value["index"]["kind"] != "graph":
+            errors.append("graph usage requires a graph index kind")
+        if graph.get("used") and not graph.get("algorithm"):
+            errors.append("used graph indexes require an algorithm")
+        if value["index"]["kind"] == "graph" and not graph.get("used"):
+            errors.append("graph index manifests must record graph usage")
+        chunk_count = sum(len(member["chunks"]) for member in members)
+        if value["index"]["record_count"] != chunk_count:
+            errors.append("embedding index record count must match chunk count")
+        if value["status"] == "active":
+            if value["freshness"]["status"] != "current":
+                errors.append("active embedding manifests must be current")
+            if value["validation"]["status"] != "pass":
+                errors.append("active embedding manifests must pass validation")
 
     if name == "tool-definition.yaml":
         effect = value["effect"]

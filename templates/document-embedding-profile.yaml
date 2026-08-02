@@ -1,0 +1,63 @@
+schema_version: "0.2.0"
+subframework_id: TRACE-DM
+embedding_group_id: EMBED-GROUP.DOMAIN.ACTIVE-DOCS
+status: draft  # draft | active | suspended | deprecated
+
+# 임베딩은 전체 Catalog가 아니라 이 그룹에만 적용된다.
+scope:
+  membership_mode: explicit  # explicit | selector
+  include_artifact_ids:
+    - DOC.EXAMPLE.ONE
+  include_artifact_types: []
+  include_tags: []
+  exclude_artifact_ids: []
+  allow_partial_coverage: true
+
+source_selection:
+  tiers:
+    - summary
+    - overview
+  chunking:
+    strategy: section
+    max_chunk_bytes: 4096
+    overlap_bytes: 256
+  exclude_fields:
+    - secrets
+    - credentials
+    - restricted_raw
+
+model:
+  model_id: embedding-model-id
+  model_version: "pinned-version"
+  dimensions: 1536
+  normalization: l2  # none | l2 | provider_defined
+
+index:
+  kind: flat  # flat | graph | provider_managed
+  distance_metric: cosine  # cosine | dot_product | euclidean
+  location: null
+  graph: null
+
+retrieval:
+  allowed_purpose_classes:
+    - lookup
+    - decision_support
+    - authoring
+  max_candidates: 20
+  minimum_score: 0.75
+  allow_cross_group: false
+
+access:
+  maximum_sensitivity: internal
+  inherit_source_sensitivity: true
+  allow_secret_content: false
+
+freshness:
+  mode: generated
+  on_source_revision_change: stale
+  on_model_version_change: stale
+
+validation:
+  require_source_digest: true
+  require_vector_digest: true
+  require_membership_match: true

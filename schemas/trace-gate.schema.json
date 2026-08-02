@@ -73,9 +73,9 @@
     },
     "documentAccessIntent": {
       "type": "object",
-      "required": ["schema_version", "subframework_id", "access_intent_id", "trace_id", "request_id", "actor", "purpose", "targets", "constraints"],
+      "required": ["schema_version", "subframework_id", "access_intent_id", "trace_id", "request_id", "actor", "purpose", "targets", "retrieval", "constraints"],
       "properties": {
-        "schema_version": {"const": "0.1.0"},
+        "schema_version": {"const": "0.2.0"},
         "subframework_id": {"const": "TRACE-DM"},
         "access_intent_id": {"$ref": "#/$defs/identifier"},
         "trace_id": {"$ref": "#/$defs/identifier"},
@@ -91,6 +91,20 @@
           }
         },
         "targets": {"type": "object"},
+        "retrieval": {
+          "type": "object",
+          "required": ["mode", "embedding_group_ids"],
+          "properties": {
+            "mode": {"enum": ["exact", "semantic", "hybrid"]},
+            "embedding_group_ids": {"$ref": "#/$defs/stringArray"},
+            "query_digest": {
+              "oneOf": [
+                {"type": "string", "pattern": "^sha256:[a-fA-F0-9]{64}$"},
+                {"type": "null"}
+              ]
+            }
+          }
+        },
         "constraints": {
           "type": "object",
           "required": ["maximum_sensitivity", "freshness_requirement", "context_budget_bytes", "raw_access_requested"],
@@ -107,7 +121,7 @@
       "type": "object",
       "required": ["schema_version", "subframework_id", "manifest_id", "status", "identity", "governance", "integrity", "lineage", "storage", "freshness", "access", "tiers", "validation"],
       "properties": {
-        "schema_version": {"const": "0.1.0"},
+        "schema_version": {"const": "0.2.0"},
         "subframework_id": {"const": "TRACE-DM"},
         "manifest_id": {"$ref": "#/$defs/identifier"},
         "status": {"enum": ["draft", "active", "superseded", "archived", "rejected", "disposed"]},
@@ -119,15 +133,24 @@
         "freshness": {"type": "object", "required": ["mode", "status"]},
         "access": {"type": "object", "required": ["sensitivity", "contains_secrets"]},
         "tiers": {"type": "object", "required": ["summary", "overview", "records"]},
-        "validation": {"type": "object", "required": ["status"]}
+        "validation": {"type": "object", "required": ["status"]},
+        "semantic_projection": {
+          "type": "object",
+          "required": ["eligible", "group_memberships", "embedding_manifest_refs"],
+          "properties": {
+            "eligible": {"type": "boolean"},
+            "group_memberships": {"$ref": "#/$defs/stringArray"},
+            "embedding_manifest_refs": {"$ref": "#/$defs/stringArray"}
+          }
+        }
       },
       "additionalProperties": true
     },
     "documentReadProfile": {
       "type": "object",
-      "required": ["schema_version", "subframework_id", "profile_id", "status", "applies_to", "selection", "limits", "validation", "fallback", "escalation"],
+      "required": ["schema_version", "subframework_id", "profile_id", "status", "applies_to", "selection", "semantic_retrieval", "limits", "validation", "fallback", "escalation"],
       "properties": {
-        "schema_version": {"const": "0.1.0"},
+        "schema_version": {"const": "0.2.0"},
         "subframework_id": {"const": "TRACE-DM"},
         "profile_id": {"$ref": "#/$defs/identifier"},
         "status": {"enum": ["draft", "active", "superseded", "deprecated"]},
@@ -136,7 +159,19 @@
         "limits": {"type": "object", "required": ["maximum_sensitivity", "max_context_bytes", "max_records"]},
         "validation": {"type": "object"},
         "fallback": {"type": "object"},
-        "escalation": {"type": "object"}
+        "escalation": {"type": "object"},
+        "semantic_retrieval": {
+          "type": "object",
+          "required": ["mode", "allowed_group_ids", "max_candidates", "minimum_score", "allow_cross_group"],
+          "properties": {
+            "mode": {"enum": ["disabled", "optional", "required"]},
+            "allowed_group_ids": {"$ref": "#/$defs/stringArray"},
+            "max_candidates": {"type": "integer", "minimum": 1},
+            "minimum_score": {"type": "number", "minimum": 0, "maximum": 1},
+            "allow_cross_group": {"type": "boolean"},
+            "exact_fallback": {"type": "boolean"}
+          }
+        }
       },
       "additionalProperties": true
     },
@@ -144,7 +179,7 @@
       "type": "object",
       "required": ["schema_version", "subframework_id", "receipt_id", "trace_id", "request_id", "access_intent_id", "review", "gate_results", "access_plan", "evidence_refs"],
       "properties": {
-        "schema_version": {"const": "0.1.0"},
+        "schema_version": {"const": "0.2.0"},
         "subframework_id": {"const": "TRACE-DM"},
         "receipt_id": {"$ref": "#/$defs/identifier"},
         "trace_id": {"$ref": "#/$defs/identifier"},
@@ -154,6 +189,135 @@
         "gate_results": {"type": "array", "minItems": 1},
         "access_plan": {"type": "object", "required": ["decision", "allowed", "excluded", "context_budget_bytes"]},
         "evidence_refs": {"type": "array"}
+      },
+      "additionalProperties": true
+    },
+    "documentEmbeddingProfile": {
+      "type": "object",
+      "required": ["schema_version", "subframework_id", "embedding_group_id", "status", "scope", "source_selection", "model", "index", "retrieval", "access", "freshness", "validation"],
+      "properties": {
+        "schema_version": {"const": "0.2.0"},
+        "subframework_id": {"const": "TRACE-DM"},
+        "embedding_group_id": {"$ref": "#/$defs/identifier"},
+        "status": {"enum": ["draft", "active", "suspended", "deprecated"]},
+        "scope": {
+          "type": "object",
+          "required": ["membership_mode", "include_artifact_ids", "include_artifact_types", "include_tags", "exclude_artifact_ids", "allow_partial_coverage"],
+          "properties": {
+            "membership_mode": {"enum": ["explicit", "selector"]},
+            "include_artifact_ids": {"$ref": "#/$defs/stringArray"},
+            "include_artifact_types": {"$ref": "#/$defs/stringArray"},
+            "include_tags": {"$ref": "#/$defs/stringArray"},
+            "exclude_artifact_ids": {"$ref": "#/$defs/stringArray"},
+            "allow_partial_coverage": {"type": "boolean"}
+          }
+        },
+        "source_selection": {
+          "type": "object",
+          "required": ["tiers", "chunking", "exclude_fields"],
+          "properties": {
+            "tiers": {"type": "array", "items": {"enum": ["summary", "overview", "selected_records", "full_records"]}, "minItems": 1, "uniqueItems": true},
+            "chunking": {"type": "object", "required": ["strategy", "max_chunk_bytes", "overlap_bytes"]},
+            "exclude_fields": {"$ref": "#/$defs/stringArray"}
+          }
+        },
+        "model": {
+          "type": "object",
+          "required": ["model_id", "model_version", "dimensions", "normalization"],
+          "properties": {
+            "model_id": {"type": "string", "minLength": 1},
+            "model_version": {"type": "string", "minLength": 1},
+            "dimensions": {"type": "integer", "minimum": 1},
+            "normalization": {"enum": ["none", "l2", "provider_defined"]}
+          }
+        },
+        "index": {
+          "type": "object",
+          "required": ["kind", "distance_metric", "location", "graph"],
+          "properties": {
+            "kind": {"enum": ["flat", "graph", "provider_managed"]},
+            "distance_metric": {"enum": ["cosine", "dot_product", "euclidean"]},
+            "location": {"type": ["string", "null"]},
+            "graph": {
+              "type": ["object", "null"],
+              "properties": {"algorithm": {"type": "string"}, "parameters": {"type": "object"}}
+            }
+          }
+        },
+        "retrieval": {
+          "type": "object",
+          "required": ["allowed_purpose_classes", "max_candidates", "minimum_score", "allow_cross_group"],
+          "properties": {
+            "allowed_purpose_classes": {"$ref": "#/$defs/stringArray"},
+            "max_candidates": {"type": "integer", "minimum": 1},
+            "minimum_score": {"type": "number", "minimum": 0, "maximum": 1},
+            "allow_cross_group": {"type": "boolean"}
+          }
+        },
+        "access": {
+          "type": "object",
+          "required": ["maximum_sensitivity", "inherit_source_sensitivity", "allow_secret_content"],
+          "properties": {
+            "maximum_sensitivity": {"enum": ["public", "internal", "confidential", "restricted"]},
+            "inherit_source_sensitivity": {"const": true},
+            "allow_secret_content": {"const": false}
+          }
+        },
+        "freshness": {"type": "object", "required": ["mode", "on_source_revision_change", "on_model_version_change"]},
+        "validation": {"type": "object", "required": ["require_source_digest", "require_vector_digest", "require_membership_match"]}
+      },
+      "additionalProperties": true
+    },
+    "documentEmbeddingManifest": {
+      "type": "object",
+      "required": ["schema_version", "subframework_id", "embedding_manifest_id", "embedding_group_id", "status", "generated_at", "model", "source_members", "index", "freshness", "validation"],
+      "properties": {
+        "schema_version": {"const": "0.2.0"},
+        "subframework_id": {"const": "TRACE-DM"},
+        "embedding_manifest_id": {"$ref": "#/$defs/identifier"},
+        "embedding_group_id": {"$ref": "#/$defs/identifier"},
+        "status": {"enum": ["draft", "active", "stale", "rejected", "archived"]},
+        "generated_at": {"type": "string"},
+        "model": {"type": "object", "required": ["model_id", "model_version", "dimensions", "normalization"]},
+        "source_members": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "required": ["artifact_id", "revision_id", "source_digest", "chunks"],
+            "properties": {
+              "artifact_id": {"$ref": "#/$defs/identifier"},
+              "revision_id": {"$ref": "#/$defs/identifier"},
+              "source_digest": {"type": "string", "pattern": "^sha256:[a-fA-F0-9]{64}$"},
+              "chunks": {
+                "type": "array",
+                "minItems": 1,
+                "items": {
+                  "type": "object",
+                  "required": ["chunk_id", "content_digest", "vector_digest"],
+                  "properties": {
+                    "chunk_id": {"$ref": "#/$defs/identifier"},
+                    "content_digest": {"type": "string", "pattern": "^sha256:[a-fA-F0-9]{64}$"},
+                    "vector_digest": {"type": "string", "pattern": "^sha256:[a-fA-F0-9]{64}$"}
+                  }
+                }
+              }
+            }
+          }
+        },
+        "index": {
+          "type": "object",
+          "required": ["kind", "location", "index_digest", "record_count"],
+          "properties": {
+            "kind": {"enum": ["flat", "graph", "provider_managed"]},
+            "location": {"type": "string", "minLength": 1},
+            "index_digest": {"type": "string", "pattern": "^sha256:[a-fA-F0-9]{64}$"},
+            "record_count": {"type": "integer", "minimum": 0},
+            "graph": {"type": "object"}
+          }
+        },
+        "freshness": {"type": "object", "required": ["status", "evaluated_at", "reason"]},
+        "validation": {"type": "object", "required": ["status", "validated_at", "failures"]}
       },
       "additionalProperties": true
     },

@@ -1,4 +1,4 @@
-schema_version: "0.1.0"
+schema_version: "0.2.0"
 subframework_id: TRACE-DM
 manifest_id: DOC-MANIFEST.YYYYMMDD.HHMM.SHORT.NAME
 status: draft  # draft | active | superseded | archived | rejected | disposed
@@ -78,3 +78,10 @@ validation:
   validated_at: null
   warnings: 0
   failures: 0
+
+# 이 block은 선택 사항이다. 임베딩 대상이 아닌 문서는 block 자체를
+# 생략하거나 eligible=false로 유지할 수 있다.
+semantic_projection:
+  eligible: false
+  group_memberships: []
+  embedding_manifest_refs: []
