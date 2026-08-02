@@ -108,6 +108,8 @@ flowchart TD
 - 문서와 실제 상태가 다르면 실제 control plane과 런타임을 우선한다.
 - 읽지 않은 상태에서 완료·실패·운영 여부를 추정하지 않는다.
 
+AI/LLM의 문서 접근은 [TRACE Document Management Subframework](subframeworks/TRACE-DOCUMENT-MANAGEMENT.ko.md)를 사용할 수 있다. 실행 화면이나 제품명이 아니라 접근 목적을 먼저 분류하고, Manifest와 freshness를 검증한 뒤 Summary → Overview → 선택 Records 순으로 필요한 최소 문맥만 확대한다.
+
 ### 4.2 Canonical Request Receipt — side effect 전에 요청을 고정한다
 
 파일 수정, push, PR, 배포, 일정 변경 등 상태를 바꾸기 전에 요청을 정본에 저장한다.
@@ -384,6 +386,10 @@ rollback rehearsal이 실행되지 않았다면 “rollback 준비 완료”로 
 - handoff pointer와 immutable snapshot
 
 새 세션은 대화 기억이 아니라 이 묶음을 통해 현재 상태를 재구성한다.
+
+#### TRACE-DM 하부 프레임
+
+[TRACE Document Management Subframework](subframeworks/TRACE-DOCUMENT-MANAGEMENT.ko.md)는 Context Rehydration, Evidence Chain과 Synchronized Truth를 문서 lifecycle에 적용한다. 문서 identity·revision·정본·projection을 분리하고, AI/LLM 접근 전에 목적·권한·민감도·freshness·context budget을 심사한다. TRACE core의 Request Receipt와 Explicit Authorization을 대체하지 않으며 문서 관련 세부 Gate 결과를 Evidence Chain에 반환한다.
 
 ---
 

@@ -27,6 +27,7 @@ flowchart LR
 ## 문서
 
 - [TRACE Gate Framework 전체 문서](docs/TRACE-GATE-FRAMEWORK.ko.md)
+- [TRACE Document Management Subframework](docs/subframeworks/TRACE-DOCUMENT-MANAGEMENT.ko.md): 문서 정본·계보와 AI/LLM 목적 기반 사전 접근 선별
 - [기여 가이드](CONTRIBUTING.md)
 
 ## 바로 사용하기
@@ -38,6 +39,10 @@ flowchart LR
 - `evidence-manifest.yaml`: commit·image·run·hash 증거 사슬
 - `gate-decision.yaml`: KPI와 승격 판정
 - `HANDOFF.md`: 다음 작업자·AI 세션을 위한 상태 인계
+- `document-access-intent.yaml`: AI/LLM 접근 목적·대상·민감도 선언
+- `document-read-profile.yaml`: 목적별 최소 tier·context budget·확대 조건
+- `document-manifest.yaml`: 문서 revision·무결성·계보·freshness 계약
+- `document-gate-receipt.yaml`: 사전 접근 심사와 문서 Gate 판정 증적
 
 가장 작은 도입 단위는 다음 네 가지입니다.
 
@@ -45,6 +50,8 @@ flowchart LR
 2. 허용·금지 경계
 3. 기계적으로 판정 가능한 Gate
 4. 재현 가능한 Evidence
+
+AI/LLM이 문서에 접근하는 프로젝트는 TRACE-DM의 `Access Intent → Pre-access Review → ReadProfile → 최소 Context Pack → GateReceipt` 흐름을 함께 적용할 수 있습니다. 접근 도구가 아니라 선언된 목적에 따라 Summary, Overview, 선택 Records, full history와 raw의 허용 범위를 결정합니다.
 
 ## 적용 대상
 
@@ -57,6 +64,18 @@ flowchart LR
 ## 버전
 
 현재 문서 버전은 `1.0.0`입니다.
+
+## 템플릿 검증
+
+Python 기반 검증은 Python 3.9 이상의 프로젝트별 가상환경에서 실행합니다.
+
+```bash
+python3 -m venv .venv
+.venv/bin/python -m pip install -r requirements-dev.txt
+.venv/bin/python scripts/validate_templates.py
+```
+
+검증기는 모든 YAML의 문법과 중복 key를 확인하고 TRACE-DM 템플릿의 필수 top-level field와 `subframework_id`를 검사합니다. `.venv`는 저장소에 포함하지 않습니다.
 
 ## 라이선스
 

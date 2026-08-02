@@ -1,0 +1,46 @@
+schema_version: "0.1.0"
+subframework_id: TRACE-DM
+receipt_id: TRACE.DM.RECEIPT.YYYYMMDD.HHMM.SHORT.NAME
+trace_id: TRACE.YYYYMMDD.HHMM.SHORT.NAME
+request_id: REQ.YYYYMMDD.HHMM.SHORT.NAME
+access_intent_id: ACCESS.YYYYMMDD.HHMM.SHORT.NAME
+evaluated_at: 2026-01-01T09:01:00+09:00
+
+actor:
+  actor_id: actor-or-service-id
+  roles: []
+
+review:
+  purpose_class: lookup
+  declared_purpose: "접근이 필요한 구체적인 이유"
+  operation: read
+  profile_id: document.lookup.default
+
+gate_results:
+  - gate_id: TRACE.DM.G00.INTAKE
+    status: pass  # pass | warn | fail | blocked
+    evidence_refs: []
+    reason: "목적과 대상이 식별됐다."
+  - gate_id: TRACE.DM.G07.ACCESS
+    status: pass
+    evidence_refs: []
+    reason: "선언된 목적과 sensitivity 범위가 허용됐다."
+  - gate_id: TRACE.DM.G08.CONTEXT
+    status: pass
+    evidence_refs: []
+    reason: "선택 문맥이 profile과 budget 안에 있다."
+
+access_plan:
+  decision: allow  # allow | allow_reduced | escalate | deny | blocked
+  allowed:
+    - artifact_id: DOC.SHORT.NAME
+      revision_id: REV.YYYYMMDD.HHMM
+      tier: summary
+  excluded: []
+  required_escalations: []
+  context_budget_bytes: 30720
+  context_pack_ref: null
+
+evidence_refs: []
+expires_at: null
+purpose_change_requires_new_review: true

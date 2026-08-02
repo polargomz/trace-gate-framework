@@ -17,6 +17,7 @@ TRACE Gate Framework에 대한 개선 제안과 기여를 환영합니다.
 3. 변경된 원칙에 대응하는 예시나 템플릿을 함께 갱신합니다.
 4. Markdown과 Mermaid 렌더링을 확인합니다.
 5. 호환성을 깨는 변경은 문서 버전과 migration note를 포함합니다.
+6. 하부 프레임워크 변경은 Framework ID, 자체 버전과 호환되는 TRACE core 버전을 명시합니다.
 
 ## Pull Request 체크리스트
 
@@ -25,7 +26,16 @@ TRACE Gate Framework에 대한 개선 제안과 기여를 환영합니다.
 - [ ] 관련 템플릿을 갱신했습니다.
 - [ ] Mermaid code block이 정상적으로 닫혔습니다.
 - [ ] 비밀정보와 내부 경로가 없습니다.
+- [ ] 하부 프레임워크 변경이면 core 호환성과 관련 템플릿을 확인했습니다.
 - [ ] 남은 한계와 후속 작업을 기록했습니다.
+
+## 로컬 템플릿 검증
+
+```bash
+python3 -m venv .venv
+.venv/bin/python -m pip install -r requirements-dev.txt
+.venv/bin/python scripts/validate_templates.py
+```
 
 ## 기여 라이선스
 
