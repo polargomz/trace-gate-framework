@@ -2,7 +2,7 @@
 
 > 추적 가능하고 안전한 소프트웨어 변경·마이그레이션을 위한 증거 기반 실행 프레임워크
 
-- 버전: 1.0.0
+- 버전: 1.1.0
 - 언어: 한국어
 - 저작자: polargomz
 - 라이선스: [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/)
@@ -391,6 +391,10 @@ rollback rehearsal이 실행되지 않았다면 “rollback 준비 완료”로 
 
 [TRACE Document Management Subframework](subframeworks/TRACE-DOCUMENT-MANAGEMENT.ko.md)는 Context Rehydration, Evidence Chain과 Synchronized Truth를 문서 lifecycle에 적용한다. 문서 identity·revision·정본·projection을 분리하고, AI/LLM 접근 전에 목적·권한·민감도·freshness·context budget을 심사한다. TRACE core의 Request Receipt와 Explicit Authorization을 대체하지 않으며 문서 관련 세부 Gate 결과를 Evidence Chain에 반환한다.
 
+#### TRACE-AH 하부 프레임
+
+[TRACE Agent Harness Subframework](subframeworks/TRACE-AGENT-HARNESS.ko.md)는 TRACE의 승인과 검증 계약을 실제 model·tool 실행 반복에 연결한다. typed output, scoped Tool Registry, budget, append-only checkpoint, verifier loop와 선택적 subagent 계약을 정의한다. 모델의 판단은 권한 또는 Gate 통과를 생성하지 않으며, 최종 authority promotion은 TRACE core에 남는다.
+
 ---
 
 ## 5. 세 개의 Plane으로 시스템을 설계한다
@@ -767,11 +771,12 @@ raw_evidence_location: null
 ### 13.4 Gate Decision
 
 ```yaml
+schema_version: "1.1.0"
 gate_id: GATE.STAGE2.PRIMARY
-evaluated_at: 2026-01-02T09:00:00+09:00
-status: pass  # pass | fail | measuring | blocked
-evidence_refs: []
-thresholds:
+evaluator:
+  id: trace-gate.reference-evaluator
+  version: "1.1.0"
+required:
   success_rate: ">= 99%"
   duplicate_writes: 0
   forbidden_changes: 0
@@ -781,6 +786,8 @@ decision:
   still_forbidden: []
 approved_by: null
 ```
+
+`evaluated_at`, `status`, check 결과, evidence reference와 digest는 evaluator가 facts에서 생성한다. 사람이 policy에 `pass`를 직접 기록하지 않는다.
 
 ### 13.5 Handoff Snapshot
 
@@ -930,6 +937,8 @@ official writer는 기존 시스템에 남아 있다.
 9. shadow timer와 KPI 측정을 시작한다.
 10. rollback rehearsal 후 별도 승인으로 권한을 승격한다.
 11. immutable handoff snapshot으로 다음 작업자에게 넘긴다.
+12. AI agent를 운영한다면 TRACE-AH Run Envelope와 Tool Registry를 연결한다.
+13. Gate status를 수동으로 기록하지 않고 검증된 facts에서 evaluator로 생성한다.
 
 한 번에 모든 문서를 만들기보다, 실제 side effect를 통제하는 `Receipt`, `Boundary`, `Gate`, `Evidence` 네 가지부터 시작하는 것이 가장 효과적이다.
 

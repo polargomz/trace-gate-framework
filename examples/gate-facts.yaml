@@ -1,0 +1,7 @@
+success_rate: 99.5
+duplicate_writes: 0
+forbidden_changes: 0
+rollback_rehearsal: pass
+evidence_refs:
+  - EVD.EXAMPLE.REMOTE-SMOKE
+  - EVD.EXAMPLE.ROLLBACK

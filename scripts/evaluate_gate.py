@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Compatibility entrypoint for TRACE contract validation."""
+"""Compatibility entrypoint for deterministic Gate evaluation."""
 
 from __future__ import annotations
 
@@ -10,7 +10,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 
-from trace_gate.validation import main  # noqa: E402
+from trace_gate.gates import main  # noqa: E402
 
 
 if __name__ == "__main__":

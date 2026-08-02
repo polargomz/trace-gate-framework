@@ -1,6 +1,6 @@
 # TRACE Gate Framework
 
-추적 가능하고 안전한 소프트웨어 변경·마이그레이션을 위한 증거 기반 실행 프레임워크입니다.
+추적 가능하고 안전한 소프트웨어 변경·마이그레이션과 AI agent 실행을 위한 증거 기반 프레임워크입니다.
 
 > 속도는 Gate를 생략해서 얻는 것이 아니라, 경계를 명확히 하고 검증과 복구를 자동화해서 얻습니다.
 
@@ -28,7 +28,26 @@ flowchart LR
 
 - [TRACE Gate Framework 전체 문서](docs/TRACE-GATE-FRAMEWORK.ko.md)
 - [TRACE Document Management Subframework](docs/subframeworks/TRACE-DOCUMENT-MANAGEMENT.ko.md): 문서 정본·계보와 AI/LLM 목적 기반 사전 접근 선별
+- [TRACE Agent Harness Subframework](docs/subframeworks/TRACE-AGENT-HARNESS.ko.md): model·tool·verification·checkpoint와 선택적 multi-agent 계약
+- [참조 구현 사용 가이드](docs/REFERENCE-IMPLEMENTATION.ko.md)
+- [변경 기록](CHANGELOG.md)
 - [기여 가이드](CONTRIBUTING.md)
+
+## 프레임워크 구성
+
+```mermaid
+flowchart TB
+    CORE["TRACE Core<br/>Request·Boundary·Evidence·Promotion"]
+    DM["TRACE-DM<br/>Document·Context·Freshness"]
+    AH["TRACE-AH<br/>Model·Tool·State·Verification"]
+    IMPL["Reference Implementation<br/>Schema·Evaluator·Runtime·Tests"]
+
+    CORE --> DM
+    CORE --> AH
+    DM --> AH
+    AH --> IMPL
+    CORE --> IMPL
+```
 
 ## 바로 사용하기
 
@@ -43,6 +62,9 @@ flowchart LR
 - `document-read-profile.yaml`: 목적별 최소 tier·context budget·확대 조건
 - `document-manifest.yaml`: 문서 revision·무결성·계보·freshness 계약
 - `document-gate-receipt.yaml`: 사전 접근 심사와 문서 Gate 판정 증적
+- `agent-run.yaml`: run context·budget·tool·verification 계약
+- `tool-definition.yaml`: tool effect·risk·schema·idempotency 계약
+- `subagent-task.yaml`: 제한된 하위 agent scope·lease·merge 계약
 
 가장 작은 도입 단위는 다음 네 가지입니다.
 
@@ -51,7 +73,7 @@ flowchart LR
 3. 기계적으로 판정 가능한 Gate
 4. 재현 가능한 Evidence
 
-AI/LLM이 문서에 접근하는 프로젝트는 TRACE-DM의 `Access Intent → Pre-access Review → ReadProfile → 최소 Context Pack → GateReceipt` 흐름을 함께 적용할 수 있습니다. 접근 도구가 아니라 선언된 목적에 따라 Summary, Overview, 선택 Records, full history와 raw의 허용 범위를 결정합니다.
+AI/LLM이 문서에 접근하는 프로젝트는 TRACE-DM의 목적 기반 접근 판정을 적용합니다. Agent가 tool을 실행하는 프로젝트는 TRACE-AH의 typed action, scoped Tool Registry, append-only checkpoint와 verifier loop를 적용합니다.
 
 ## 적용 대상
 
@@ -63,19 +85,28 @@ AI/LLM이 문서에 접근하는 프로젝트는 TRACE-DM의 `Access Intent → 
 
 ## 버전
 
-현재 문서 버전은 `1.0.0`입니다.
+현재 TRACE core 문서 버전은 `1.1.0`입니다. TRACE-DM과 TRACE-AH는 각각 독립 버전을 가집니다.
 
 ## 템플릿 검증
 
-Python 기반 검증은 Python 3.9 이상의 프로젝트별 가상환경에서 실행합니다.
+Python 기반 참조 구현과 검증은 Python 3.11 이상의 프로젝트별 가상환경에서 실행합니다.
 
 ```bash
 python3 -m venv .venv
-.venv/bin/python -m pip install -r requirements-dev.txt
+.venv/bin/python -m pip install -e '.[dev]'
 .venv/bin/python scripts/validate_templates.py
+.venv/bin/python -m pytest -q
 ```
 
-검증기는 모든 YAML의 문법과 중복 key를 확인하고 TRACE-DM 템플릿의 필수 top-level field와 `subframework_id`를 검사합니다. `.venv`는 저장소에 포함하지 않습니다.
+검증기는 YAML 중복 key, JSON Schema, 목적·민감도·tool risk·writer 경계의 semantic invariant를 확인합니다. Gate evaluator는 증적에서 status와 digest receipt를 계산합니다.
+
+```bash
+.venv/bin/python scripts/evaluate_gate.py \
+  templates/gate-decision.yaml \
+  examples/gate-facts.yaml
+```
+
+`.venv`는 저장소에 포함하지 않습니다.
 
 ## 라이선스
 

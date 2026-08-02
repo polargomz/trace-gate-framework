@@ -1,0 +1,34 @@
+schema_version: "0.1.0"
+subframework_id: TRACE-AH
+task_id: TASK.YYYYMMDD.HHMM.SHORT.NAME
+parent_run_id: RUN.YYYYMMDD.HHMM.PARENT
+child_trace_id: TRACE.YYYYMMDD.HHMM.CHILD
+objective: "독립적으로 검증 가능한 제한된 하위 작업"
+
+scope:
+  read_roots: []
+  write_roots: []
+  forbidden_write_roots: []
+  allowed_tools:
+    - repository.read
+
+lease:
+  writer_key: null
+  expires_at: 2026-01-01T10:00:00+09:00
+
+termination:
+  deadline_seconds: 300
+  cancel_on_parent_cancel: true
+  on_timeout: cancelled
+
+merge_policy:
+  strategy: evidence_first
+  conflict: blocked
+  require_independent_verification: true
+
+handoff:
+  required_fields:
+    - status
+    - artifacts
+    - evidence_refs
+    - unresolved_risks

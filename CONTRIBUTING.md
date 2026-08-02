@@ -33,9 +33,12 @@ TRACE Gate Framework에 대한 개선 제안과 기여를 환영합니다.
 
 ```bash
 python3 -m venv .venv
-.venv/bin/python -m pip install -r requirements-dev.txt
+.venv/bin/python -m pip install -e '.[dev]'
 .venv/bin/python scripts/validate_templates.py
+.venv/bin/python -m pytest -q
 ```
+
+새 계약은 JSON Schema, semantic 음성 테스트와 문서 예시를 함께 추가합니다. Gate status를 예제에 수동으로 고정하지 않고 evaluator가 재현 가능한 증적에서 계산하게 합니다.
 
 ## 기여 라이선스
 

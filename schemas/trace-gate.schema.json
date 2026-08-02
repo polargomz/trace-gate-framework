@@ -1,0 +1,208 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://trace-gate.dev/schemas/trace-gate.schema.json",
+  "title": "TRACE Gate Framework contracts",
+  "$defs": {
+    "identifier": {"type": "string", "minLength": 3, "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"},
+    "nullableIdentifier": {"oneOf": [{"$ref": "#/$defs/identifier"}, {"type": "null"}]},
+    "stringArray": {"type": "array", "items": {"type": "string"}, "uniqueItems": true},
+    "status": {"enum": ["pass", "warn", "fail", "blocked", "measuring"]},
+    "requestReceipt": {
+      "type": "object",
+      "required": ["request_id", "received_at", "request_text", "scope", "boundaries", "completion", "pre_action_gate"],
+      "properties": {
+        "request_id": {"$ref": "#/$defs/identifier"},
+        "received_at": {"type": ["string", "object"]},
+        "request_text": {"type": "string", "minLength": 1},
+        "scope": {"type": "object", "required": ["goals", "non_goals", "allowed_side_effects", "forbidden_actions"]},
+        "boundaries": {"type": "object", "required": ["allowed_write_roots", "forbidden_write_roots", "writer_authority_change"]},
+        "completion": {"type": "object", "required": ["required_artifacts", "required_tests", "required_gates"]},
+        "pre_action_gate": {"type": "object", "required": ["classified_before_execution", "gate_status"]}
+      },
+      "additionalProperties": true
+    },
+    "ticket": {
+      "type": "object",
+      "required": ["ticket_id", "request_id", "title", "status", "acceptance_criteria", "verification"],
+      "properties": {
+        "ticket_id": {"$ref": "#/$defs/identifier"},
+        "request_id": {"$ref": "#/$defs/identifier"},
+        "title": {"type": "string", "minLength": 1},
+        "status": {"type": "string"},
+        "acceptance_criteria": {"type": "array"},
+        "verification": {"type": "array"}
+      },
+      "additionalProperties": true
+    },
+    "evidenceManifest": {
+      "type": "object",
+      "required": ["evidence_id", "request_id", "observed_at", "source", "runtime", "validation", "artifacts", "secrets_redacted"],
+      "properties": {
+        "evidence_id": {"$ref": "#/$defs/identifier"},
+        "request_id": {"$ref": "#/$defs/identifier"},
+        "source": {"type": "object"},
+        "runtime": {"type": "object"},
+        "validation": {"type": "object", "required": ["tests_passed", "tests_failed", "invariant_passed"]},
+        "artifacts": {"type": "array"},
+        "secrets_redacted": {"const": true}
+      },
+      "additionalProperties": true
+    },
+    "gateDecision": {
+      "type": "object",
+      "required": ["schema_version", "gate_id", "evaluator", "required", "decision"],
+      "properties": {
+        "schema_version": {"const": "1.1.0"},
+        "gate_id": {"$ref": "#/$defs/identifier"},
+        "evaluator": {
+          "type": "object",
+          "required": ["id", "version"],
+          "properties": {"id": {"type": "string"}, "version": {"type": "string"}}
+        },
+        "required": {"type": "object", "minProperties": 1},
+        "decision": {
+          "type": "object",
+          "required": ["newly_allowed_authority", "still_forbidden"],
+          "properties": {
+            "newly_allowed_authority": {"$ref": "#/$defs/stringArray"},
+            "still_forbidden": {"$ref": "#/$defs/stringArray"}
+          }
+        }
+      },
+      "additionalProperties": true
+    },
+    "documentAccessIntent": {
+      "type": "object",
+      "required": ["schema_version", "subframework_id", "access_intent_id", "trace_id", "request_id", "actor", "purpose", "targets", "constraints"],
+      "properties": {
+        "schema_version": {"const": "0.1.0"},
+        "subframework_id": {"const": "TRACE-DM"},
+        "access_intent_id": {"$ref": "#/$defs/identifier"},
+        "trace_id": {"$ref": "#/$defs/identifier"},
+        "request_id": {"$ref": "#/$defs/identifier"},
+        "actor": {"type": "object", "required": ["actor_id", "roles", "interface_type"]},
+        "purpose": {
+          "type": "object",
+          "required": ["purpose_class", "declared_purpose", "operation"],
+          "properties": {
+            "purpose_class": {"enum": ["lookup", "decision_support", "authoring", "controlled_change", "incident_response", "audit_reconstruction"]},
+            "declared_purpose": {"type": "string", "minLength": 8},
+            "operation": {"enum": ["read", "create", "revise", "publish", "archive", "restore", "dispose"]}
+          }
+        },
+        "targets": {"type": "object"},
+        "constraints": {
+          "type": "object",
+          "required": ["maximum_sensitivity", "freshness_requirement", "context_budget_bytes", "raw_access_requested"],
+          "properties": {
+            "maximum_sensitivity": {"enum": ["public", "internal", "confidential", "restricted"]},
+            "context_budget_bytes": {"type": "integer", "minimum": 1},
+            "raw_access_requested": {"type": "boolean"}
+          }
+        }
+      },
+      "additionalProperties": true
+    },
+    "documentManifest": {
+      "type": "object",
+      "required": ["schema_version", "subframework_id", "manifest_id", "status", "identity", "governance", "integrity", "lineage", "storage", "freshness", "access", "tiers", "validation"],
+      "properties": {
+        "schema_version": {"const": "0.1.0"},
+        "subframework_id": {"const": "TRACE-DM"},
+        "manifest_id": {"$ref": "#/$defs/identifier"},
+        "status": {"enum": ["draft", "active", "superseded", "archived", "rejected", "disposed"]},
+        "identity": {"type": "object", "required": ["artifact_id", "revision_id"]},
+        "governance": {"type": "object", "required": ["owner", "producer", "approvers", "validators"]},
+        "integrity": {"type": "object", "required": ["algorithm", "subjects"]},
+        "lineage": {"type": "object"},
+        "storage": {"type": "object", "required": ["canonical_location", "retention_class"]},
+        "freshness": {"type": "object", "required": ["mode", "status"]},
+        "access": {"type": "object", "required": ["sensitivity", "contains_secrets"]},
+        "tiers": {"type": "object", "required": ["summary", "overview", "records"]},
+        "validation": {"type": "object", "required": ["status"]}
+      },
+      "additionalProperties": true
+    },
+    "documentReadProfile": {
+      "type": "object",
+      "required": ["schema_version", "subframework_id", "profile_id", "status", "applies_to", "selection", "limits", "validation", "fallback", "escalation"],
+      "properties": {
+        "schema_version": {"const": "0.1.0"},
+        "subframework_id": {"const": "TRACE-DM"},
+        "profile_id": {"$ref": "#/$defs/identifier"},
+        "status": {"enum": ["draft", "active", "superseded", "deprecated"]},
+        "applies_to": {"type": "object"},
+        "selection": {"type": "object", "required": ["default_tiers", "full_history_allowed", "raw_access_allowed"]},
+        "limits": {"type": "object", "required": ["maximum_sensitivity", "max_context_bytes", "max_records"]},
+        "validation": {"type": "object"},
+        "fallback": {"type": "object"},
+        "escalation": {"type": "object"}
+      },
+      "additionalProperties": true
+    },
+    "documentGateReceipt": {
+      "type": "object",
+      "required": ["schema_version", "subframework_id", "receipt_id", "trace_id", "request_id", "access_intent_id", "review", "gate_results", "access_plan", "evidence_refs"],
+      "properties": {
+        "schema_version": {"const": "0.1.0"},
+        "subframework_id": {"const": "TRACE-DM"},
+        "receipt_id": {"$ref": "#/$defs/identifier"},
+        "trace_id": {"$ref": "#/$defs/identifier"},
+        "request_id": {"$ref": "#/$defs/identifier"},
+        "access_intent_id": {"$ref": "#/$defs/identifier"},
+        "review": {"type": "object"},
+        "gate_results": {"type": "array", "minItems": 1},
+        "access_plan": {"type": "object", "required": ["decision", "allowed", "excluded", "context_budget_bytes"]},
+        "evidence_refs": {"type": "array"}
+      },
+      "additionalProperties": true
+    },
+    "agentRun": {
+      "type": "object",
+      "required": ["schema_version", "subframework_id", "run_id", "trace_id", "request_id", "limits", "tool_policy", "verification"],
+      "properties": {
+        "schema_version": {"const": "0.1.0"},
+        "subframework_id": {"const": "TRACE-AH"},
+        "run_id": {"$ref": "#/$defs/identifier"},
+        "trace_id": {"$ref": "#/$defs/identifier"},
+        "request_id": {"$ref": "#/$defs/identifier"},
+        "limits": {"type": "object", "required": ["max_steps", "max_tool_calls", "deadline_seconds"]},
+        "tool_policy": {"type": "object", "required": ["allowed_tools", "authorization_refs"]},
+        "verification": {"type": "object", "required": ["required"]}
+      },
+      "additionalProperties": true
+    },
+    "toolDefinition": {
+      "type": "object",
+      "required": ["schema_version", "subframework_id", "tool_id", "description", "effect", "risk", "input_schema", "timeout_seconds", "evidence"],
+      "properties": {
+        "schema_version": {"const": "0.1.0"},
+        "subframework_id": {"const": "TRACE-AH"},
+        "tool_id": {"$ref": "#/$defs/identifier"},
+        "effect": {"enum": ["read", "write", "destructive"]},
+        "risk": {"enum": ["green", "amber", "red"]},
+        "input_schema": {"type": "object"},
+        "timeout_seconds": {"type": "number", "exclusiveMinimum": 0},
+        "evidence": {"type": "object"}
+      },
+      "additionalProperties": true
+    },
+    "subagentTask": {
+      "type": "object",
+      "required": ["schema_version", "subframework_id", "task_id", "parent_run_id", "child_trace_id", "objective", "scope", "lease", "termination", "merge_policy"],
+      "properties": {
+        "schema_version": {"const": "0.1.0"},
+        "subframework_id": {"const": "TRACE-AH"},
+        "task_id": {"$ref": "#/$defs/identifier"},
+        "parent_run_id": {"$ref": "#/$defs/identifier"},
+        "child_trace_id": {"$ref": "#/$defs/identifier"},
+        "objective": {"type": "string", "minLength": 8},
+        "scope": {"type": "object", "required": ["read_roots", "write_roots", "allowed_tools"]},
+        "lease": {"type": "object", "required": ["writer_key", "expires_at"]},
+        "termination": {"type": "object", "required": ["deadline_seconds", "cancel_on_parent_cancel"]},
+        "merge_policy": {"type": "object", "required": ["strategy", "conflict"]}
+      },
+      "additionalProperties": true
+    }
+  }
+}

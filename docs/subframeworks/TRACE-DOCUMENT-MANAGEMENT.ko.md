@@ -3,7 +3,8 @@
 - Subframework ID: `TRACE-DM`
 - Version: `0.1.0`
 - Status: `proposed subframework specification`
-- Parent framework: [`polargomz/trace-gate-framework`](https://github.com/polargomz/trace-gate-framework) `1.0.0`
+- Parent framework: [`polargomz/trace-gate-framework`](https://github.com/polargomz/trace-gate-framework) `1.1.0`
+- Parent compatibility: TRACE core `1.0.0–1.1.x`
 - Parent axes: `Trace · Restrict · Assemble · Confirm · Elevate`
 - Scope: 문서·원장·증적의 생성, 읽기, 변경, 추적, 보존과 폐기
 - Normative dependency: TRACE Gate Framework의 Request, Boundary, Evidence, Promotion과 Handoff 계약
@@ -131,7 +132,7 @@ Summary → Overview → Selected Records → Full Records/Raw
 - source revision, source hash, generated time
 - Overview와 Records 위치
 
-Summary는 정본에서 결정적으로 재생성되어야 하며 사람이 직접 현재 값을 고치는 방식은 허용하지 않는다.
+Summary는 정본에서 결정적으로 재생성되어야 하며 사람이 직접 현재 값을 고치는 방식은 허용하지 않는다. Summary는 증적 원본을 대체하지 않지만 source revision·hash와 freshness가 검증되면 lookup·일반 decision support의 기본 context projection으로 사용할 수 있다. 원본 확대는 목적과 Gate가 요구할 때만 수행한다.
 
 ### Overview
 
@@ -579,7 +580,7 @@ TRACE-DM 배포 단위는 다음을 함께 제공해야 한다.
 4. README 문서 목록에 TRACE-DM을 추가한다.
 5. access intent, manifest, read profile과 GateReceipt 최소 템플릿을 제공한다.
 6. Markdown·Mermaid·내부 link와 secret·내부 경로 부재를 검증한다.
-7. TRACE core `1.0.0`과의 호환성을 명시하고 core 의미를 바꾸는 변경은 별도 버전 판단으로 분리한다.
+7. 호환되는 TRACE core 버전 범위를 명시하고 core 의미를 바꾸는 변경은 별도 버전 판단으로 분리한다.
 
 TRACE core와 공유해야 하는 integration point:
 

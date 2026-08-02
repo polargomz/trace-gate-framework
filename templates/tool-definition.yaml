@@ -1,0 +1,34 @@
+schema_version: "0.1.0"
+subframework_id: TRACE-AH
+tool_id: repository.read
+description: "승인된 저장소 경로에서 텍스트를 읽는다."
+effect: read  # read | write | destructive
+risk: green  # green | amber | red
+
+input_schema:
+  type: object
+  required:
+    - path
+  properties:
+    path:
+      type: string
+
+scope:
+  allowed_roots: []
+  forbidden_roots: []
+
+timeout_seconds: 30
+retry:
+  maximum_attempts: 2
+  retryable_errors: []
+
+idempotency:
+  strategy: content-addressed-read
+
+evidence:
+  record_arguments: true
+  redact_fields: []
+  hash_output: true
+
+rollback:
+  strategy: not_applicable
