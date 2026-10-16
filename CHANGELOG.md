@@ -2,6 +2,7 @@
 
 ## Unreleased — TRACE-DM-MIGRATION 0.1.0
 
+- 후속 호환성 교정: migration plan/package의 payload revision과 relocation old/new payload revision 네 필드만 최소 길이 3→1로 바꿔 `r1`/`r5` 원문을 보존한다. 기존 link/stream revision과 맞추며 다른 ID·management revision·core schema는 변경하지 않는다. 네 필드의 허용 alphabet은 유지하고 정규식의 정확한 끝 검사를 보강해 trailing newline도 거부한다. JSON/YAML·synthetic archive roundtrip, 내용/hash 보존·invalid revision·다른 ID 제약 회귀를 추가했다. 다른 core 소비자 전체의 짧은 revision 호환성을 뜻하지 않는다.
 - 8단계 scoped migration 방법론과 수신 완료·bilateral cutover·업무 재개 분리 계약을 추가했다.
 - 기존 TRACE-DM lifecycle/core schema를 변경하지 않는 additive schema와 템플릿 11개(전체 24개)를 추가했다.
 - 승인 plan digest, scope/parent/shared owner, writer fencing 증적, relocation revision, 단일 cutover receipt·입력 digest, idempotent 재개·실패 이력·신규 데이터 보존 보상 계약을 검증한다.
