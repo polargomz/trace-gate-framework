@@ -570,6 +570,12 @@ flowchart LR
 
 오류가 발견되면 원 기록을 삭제하지 않고 correction revision 또는 correction event를 추가한다. 정정은 잘못된 값, 올바른 값, 원인, 승인, 영향 범위와 검증 결과를 연결해야 한다.
 
+### 프로젝트 분리·이전
+
+범위별 이전에는 [TRACE-DM 이전 방법론 0.1.0](TRACE-DM-MIGRATION.ko.md)을 선택 적용한다. 범위 설정, 이전 상태 전이, 지속 동결, 패키지 구성·압축·검증·보관, 목적지 생성·복사 전달·검증, 안전 해제·새 경로 revision, 목적지 수신 완료, 양측 정본 cutover 순서다.
+
+Migration transaction phase는 이 문서 7항의 문서 lifecycle enum과 분리한다. 목적지 `received_complete`는 정본 전환 전 수신 완료이며 업무 쓰기를 허용하지 않는다. 양측 freeze/acceptance·단일 canonical owner·전체 증적을 단일 cutover receipt로 확인한 뒤에만 transaction을 완료한다. 그 이후에도 별도 업무 재개 승인이 필요하다. 원본 migrated scope는 보존 동결하며 다른 업무의 공유 TRACE-DM 전체를 동결하지 않는다.
+
 ## 15. Freshness와 중복 통제
 
 Freshness는 다음 중 하나로 평가한다.
@@ -668,6 +674,8 @@ stateDiagram-v2
 - sensitivity·secret 경계를 넘는 semantic candidate 거부
 - index에 없는 revision·chunk candidate 거부
 - similarity score만으로 Trace 관계나 권한을 생성하는 구현 거부
+- 이전 방법론을 적용하면 수신 완료 직후의 업무 쓰기, 양측 cutover 누락, source 보존 동결 해제, 공유 owner 복제와 mixed chain 재작성을 거부
+- archive/per-file hash·복원·최종 cutover를 구별하고, path/link/TOCTOU·특수파일·권한·압축폭탄 및 신규 개발 손실 rollback을 검증
 
 ### 적합성 수준
 

@@ -28,6 +28,7 @@ flowchart LR
 
 - [TRACE Gate Framework 전체 문서](docs/TRACE-GATE-FRAMEWORK.ko.md)
 - [TRACE Document Management Subframework](docs/subframeworks/TRACE-DOCUMENT-MANAGEMENT.ko.md): 문서 정본·계보, 목적 기반 접근과 선택적 그룹 embedding
+- [TRACE-DM 범위별 이전 방법론](docs/subframeworks/TRACE-DM-MIGRATION.ko.md): 물리 이전/참조-only를 구분하고 수신 완료·양측 cutover·업무 활성화를 분리하는 8단계 계약
 - [TRACE Agent Harness Subframework](docs/subframeworks/TRACE-AGENT-HARNESS.ko.md): model·tool·verification·checkpoint와 선택적 multi-agent 계약
 - [참조 구현 사용 가이드](docs/REFERENCE-IMPLEMENTATION.ko.md)
 - [관리 문서 메타데이터 Manifest](docs/managed-document-manifest.yaml): 저장소 Markdown의 identity·hash·lineage·freshness·access envelope
@@ -68,6 +69,8 @@ flowchart TB
 - `agent-run.yaml`: run context·budget·tool·verification 계약
 - `tool-definition.yaml`: tool effect·risk·schema·idempotency 계약
 - `subagent-task.yaml`: 제한된 하위 agent scope·lease·merge 계약
+- `document-migration-*.yaml`, `document-relocation-map.yaml`, `document-cutover-receipt.yaml`: 선택적 이전 계획·패키지·transaction·보상·경로 map·cutover 계약
+- 상대 링크 실제 복원과 대형 artifact chunk-set은 별도 opt-in·승인 한도·명시적 resume를 요구한다. 기본 archive의 링크 거부와 256MiB 한도는 유지한다. synthetic 검증은 실제 외부 저장소·분산 fencing·프로젝트 복원 성공을 뜻하지 않는다.
 
 가장 작은 도입 단위는 다음 네 가지입니다.
 
@@ -89,6 +92,8 @@ AI/LLM이 문서에 접근하는 프로젝트는 TRACE-DM의 목적 기반 접�
 ## 버전
 
 현재 TRACE core 문서 버전은 `1.1.0`입니다. TRACE-DM `0.2.0`과 TRACE-AH `0.1.0`은 각각 독립 버전을 가집니다.
+
+선택적 TRACE-DM-MIGRATION 계약은 `0.1.0`이며 TRACE-DM `0.2.0`·core `1.1.x`와 호환된다. 기존 문서 상태 enum은 변경하지 않는다. 참조 검증/안전 해제는 실제 분산 fencing·NAS 복원·업무 재개 실행을 대신하지 않는다.
 
 ## 템플릿 검증
 

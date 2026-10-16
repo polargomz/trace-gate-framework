@@ -1,0 +1,23 @@
+{
+  "schema_version": "0.1.0",
+  "subframework_id": "TRACE-DM",
+  "original_transaction_id": "MIGRATION.EXAMPLE.001",
+  "compensation_transaction_id": "MIGRATION.EXAMPLE.COMPENSATION",
+  "compensates_receipt_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "rollback_approval_ref": "APPROVAL.EXAMPLE.ROLLBACK",
+  "destination_quiesced": false,
+  "new_data_present": true,
+  "new_data_preserved": false,
+  "new_data_backup_sha256": null,
+  "previous_epoch": 2,
+  "new_epoch": 3,
+  "restore_receipt_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "restore_verified": false,
+  "events_append_only": true,
+  "t0_overwrite": false,
+  "business_writes_enabled": false,
+  "result": "blocked",
+  "blockers": [
+    "Synthetic pending writer/restore/new-data preservation proof"
+  ]
+}

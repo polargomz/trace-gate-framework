@@ -1,0 +1,20 @@
+{
+  "schema_version": "0.1.0",
+  "subframework_id": "TRACE-DM",
+  "transaction_id": "MIGRATION.EXAMPLE.001",
+  "plan_sha256": "fe9f88e9cb827f6e352690991db08f82cbe0c78f0bf8ab632d511a8a2bd7b749",
+  "maps": [
+    {
+      "artifact_id": "ARTIFACT.EXAMPLE",
+      "old_revision_id": "REV.EXAMPLE.1",
+      "new_revision_id": "REV.EXAMPLE.1",
+      "old_management_revision": "META.EXAMPLE.1",
+      "new_management_revision": "META.EXAMPLE.2",
+      "old_path": "payload/example.txt",
+      "new_path": "imported/example.txt",
+      "old_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "new_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "content_changed": false
+    }
+  ]
+}
