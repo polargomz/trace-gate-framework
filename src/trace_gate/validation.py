@@ -38,6 +38,10 @@ TEMPLATE_SCHEMAS = {
     "document-migration-transaction.yaml": "migrationTransaction",
     "document-migration-compensation.yaml": "migrationCompensation",
     "document-migration-link-policy.yaml": "migrationLinkPolicy",
+    "document-migration-link-restore.yaml": "migrationLinkPolicy",
+    "document-migration-stream-policy.yaml": "migrationStreamPolicy",
+    "document-migration-package-set.yaml": "migrationPackageSet",
+    "document-migration-reference-plan.yaml": "migrationPlan",
 }
 SCHEMA_MAPPINGS = {
     **TEMPLATE_SCHEMAS,
@@ -228,7 +232,7 @@ def validate_value(name: str, value: dict[str, Any]) -> None:
     schema_name = SCHEMA_MAPPINGS.get(name)
     if schema_name is None:
         raise ValueError(f"no schema mapping for {name}")
-    is_migration = name in {"document-migration-plan.yaml", "document-migration-package.yaml", "document-relocation-map.yaml", "document-cutover-receipt.yaml", "document-migration-transaction.yaml", "document-migration-compensation.yaml", "document-migration-link-policy.yaml"}
+    is_migration = schema_name in {"migrationPlan","migrationPackage","relocationMap","cutoverReceipt","migrationTransaction","migrationCompensation","migrationLinkPolicy","migrationStreamPolicy","migrationPackageSet"}
     root_schema = json.loads((ROOT / "schemas/document-migration.schema.json").read_text()) if is_migration else load_schema()
     schema = {"$ref": f"#/$defs/{schema_name}", **root_schema}
     validator = jsonschema.Draft202012Validator(schema)
@@ -236,9 +240,12 @@ def validate_value(name: str, value: dict[str, Any]) -> None:
     messages = [error.message for error in schema_errors]
     if is_migration:
         if not schema_errors:
-            if name == "document-migration-link-policy.yaml":
+            if schema_name == "migrationLinkPolicy":
                 from .migration_links import descriptor_errors
                 messages.extend(descriptor_errors(value))
+            elif schema_name in {"migrationStreamPolicy","migrationPackageSet"}:
+                from .migration_stream import policy_errors,manifest_errors
+                messages.extend(policy_errors(value) if schema_name=='migrationStreamPolicy' else manifest_errors(value))
             else:
                 from .migration import semantic_errors as migration_errors
                 messages.extend(migration_errors(name, value))

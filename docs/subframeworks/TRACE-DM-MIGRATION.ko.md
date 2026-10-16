@@ -18,7 +18,9 @@
 
 `document-migration-plan.yaml`에서 원본·목적지 partition, 정확한 host와 project, 기준 root, 포함·제외 경로, artifact ID/revision/hash, 외부 의존성, 공유 canonical owner와 parent closure를 고정한다. 실행자가 다른 기기나 하위 폴더를 편의상 프로젝트 root로 대신 정하지 않는다. 파일 경로의 prefix만으로 자료의 소유권을 추론하지 않는다.
 
-ignored/untracked 파일, 외부 계산 자료, CAD/PCB 리소스, 환경 설정, 컨테이너 bind mount도 범위 검토에 포함한다. 외부 원본과 공유 원장은 가져올지, 검증된 scoped export만 만들지, 원 owner를 참조할지 결정한다. 공유 canonical record 자체를 이전 대상과 중복 등록하지 않는다.
+ignored/untracked 파일, 외부 저장소, 개발·실행 엔진 리소스, 환경 설정, 컨테이너 bind mount도 범위 검토에 포함한다. 외부 원본과 공유 원장은 가져올지, 검증된 scoped export만 만들지, 원 owner를 참조할지 결정한다. 공유 canonical record 자체를 이전 대상과 중복 등록하지 않는다.
+
+계획의 `migration_mode`는 기본 `physical_relocation` 또는 명시 승인된 `reference_only`다. 물리 이전은 실제 payload 패키징·전달·복원·의존성 검증을 요구한다. 참조만 이전은 `document-migration-reference-plan.yaml`처럼 **참조 관리 artifact만** 새 partition으로 이전한다. 외부 payload의 stable ID·canonical owner·보존 위치·접근 정책·고정 version/hash·지속성 정책·dependency/rollback 증적을 reference manifest에 결합하고 외부 parent closure를 유지한다. 원데이터의 소유권·보관 위치는 바꾸지 않는다. 대형 artifact라는 이유로 물리 이전을 자동으로 참조-only로 축소하지 않는다. 모드 변경은 새 계획 digest와 재승인 대상이다.
 
 전체 계획의 canonical JSON SHA-256을 승인 receipt에 연결한다. 승인에는 실행 근거와 확정된 방법론 Git commit을 함께 기록한다. root·범위·보관·writer 통제·의존성이 바뀌면 새 계획 revision과 digest를 만들고 변경 범위를 재승인한다. 계획 digest는 실행 승인을 대체하지 않으며, 예제의 placeholder 승인이나 commit은 실제 증명이 아니다.
 
@@ -28,7 +30,7 @@ ignored/untracked 파일, 외부 계산 자료, CAD/PCB 리소스, 환경 설정
 
 승인된 계획을 참조하는 transaction을 생성하고 실제 writer 정지와 fencing을 검증한 뒤 `migrating_frozen`으로 전이한다. 문서 상태를 일괄 `migrating`으로 바꾸는 작업이 아니다. source cutoff inventory와 범위 digest를 고정하고 `scope_freeze` 증적에 연결한다.
 
-writer 목록에는 에디터·자동 작업·solver·컨테이너·다른 세션·다른 호스트·오프라인 동기화 기기를 포함한다. 부모 경로 writer가 자식 범위에 쓸 수 있는지, lease 만료 뒤 stale writer가 다시 쓸 수 있는지도 검사한다. 프로세스를 확인할 수 없거나 writer를 통제하지 못하면 `blocked`로 중단한다. lock 파일 존재, 두 번의 hash 일치나 오래된 상태 문자열로 writer 부재를 선언하지 않는다.
+writer 목록에는 에디터·자동 작업·개발/실행 엔진·컨테이너·다른 세션·다른 호스트·오프라인 동기화 기기를 포함한다. 부모 경로 writer가 자식 범위에 쓸 수 있는지, lease 만료 뒤 stale writer가 다시 쓸 수 있는지도 검사한다. 프로세스를 확인할 수 없거나 writer를 통제하지 못하면 `blocked`로 중단한다. lock 파일 존재, 두 번의 hash 일치나 오래된 상태 문자열로 writer 부재를 선언하지 않는다.
 
 독립 백업과 복원 시험을 고정된 cutoff에 결합한다. 백업이 cutoff와 다르면 필요한 추가 백업을 검증한다. `scope_verified`, `dependency_verified`, `writer_quiescence_verified`, `scope_freeze`, `backup`, `restore_rehearsal`은 서로 다른 증적 종류다.
 
@@ -62,15 +64,17 @@ writer 목록에는 에디터·자동 작업·solver·컨테이너·다른 세�
 
 archive를 실행하거나 기존 업무 정본 위에 풀지 않는다. 목록·경로·형식·용량을 먼저 검증하고 새 빈 private staging에만 해제한다. 절대 경로, drive/UNC, `..`, NUL·제어 문자, 중복·NFC/대소문자 충돌, file-as-directory, 링크 탈출, 특수파일, 예상 밖 권한과 압축폭탄을 거부한다.
 
-symlink/hardlink는 lexical target 검사만으로 안전하지 않다. 실제 해소 경로, 링크 뒤 후속 member, 교체 경쟁도 막아야 한다. 참조 해제기는 모든 링크를 거부한다. 링크가 필수인 프로젝트는 target 문자열·존재·root containment와 후속 member/TOCTOU를 검증하는 별도 adapter가 승인되기 전까지 차단한다. 허용 metadata를 보존하는 것과 archive의 owner·ACL·xattr·권한을 그대로 적용하는 것을 구별한다. script, macro, hook, solver나 import side effect를 실행하지 않는다.
+symlink/hardlink는 lexical target 검사만으로 안전하지 않다. 실제 해소 경로, 링크 뒤 후속 member, 교체 경쟁도 막아야 한다. 기본 archive 해제기는 모든 링크를 거부한다. 내부 상대 symlink가 필요한 경우 아래의 별도 opt-in adapter에서 일반 파일 검증을 마친 후 링크만 마지막에 재구성한다. hardlink는 해당 adapter에서도 지원하지 않는다. 허용 metadata를 보존하는 것과 archive의 owner·ACL·xattr·권한을 그대로 적용하는 것을 구별한다. script, macro, hook, 개발/실행 엔진이나 import side effect를 실행하지 않는다.
 
 해제 직후 전수 hash·size를 대조한다. 이후 Catalog, Manifest, 현재 resolver, 코드·설정·본문의 경로 의존성을 새 revision에서 업데이트한다. 원형 해제본·archive·historical event/receipt는 수정하지 않는다. `document-relocation-map.yaml`은 artifact ID, old/new revision·management revision, old/new path/hash, 내용 변경 여부를 연결한다. 바이트가 같은 payload는 원 revision/hash를 유지하고 위치 관리정보만 새 revision으로 만든다. 코드의 바이트가 바뀌면 파생 payload revision과 새 hash를 기록한다.
 
-절대 참조, 외부 모델, case 내부 상대 링크, 병렬 계산의 rank/region 구조, mount, parent closure, 역참조, host/project/cwd와 접근권한을 검사한다. 옛 경로를 전체 검색치환해 불변 증거를 위조하지 않는다. 미지원 metadata·의존성 validator가 있으면 한계와 blocker를 기록한다.
+절대 참조, 외부 저장소·엔진 의존성, 내부 상대 링크, 분할 실행 구조, mount, parent closure, 역참조, host/project/cwd와 접근권한을 검사한다. 옛 경로를 전체 검색치환해 불변 증거를 위조하지 않는다. 미지원 metadata·의존성 validator가 있으면 한계와 blocker를 기록한다.
 
 ## 7. 목적지 TRACE-DM에 수신·검증 완료를 기록한다
 
 수신 archive, 안전 해제, per-file 무결성, relocation map과 파생 revision, 의존성·공유 owner·parent closure·역참조 검증, rollback anchor를 acceptance evidence에 결합한다. 필수 blocker가 없을 때만 `received_complete`로 기록한다. UI에서 사용하는 destination `completed` 표현도 수신 완료라는 의미를 명시해야 한다.
+
+`reference_only`에서는 payload 전송/압축 해제 증적 대신 reference manifest 보존·접근·version/hash·지속성 검증, 등록·dependency·rollback 검증과 reference acceptance를 요구한다. 이 증적의 subject digest는 동일 reference manifest에 결합한다. 이 모드의 수신 완료는 **참조 metadata 수신·검증 완료**이며 외부 payload의 물리 전달·복원 완료가 아니다. 실제 외부 접근/지속성/복구 증명의 진위는 실행 adapter가 확인해야 한다.
 
 **이 단계에서 목적지는 canonical owner가 아니고 업무 쓰기도 비활성이다.** 원본은 scope freeze를 유지한다. 사람은 읽기 전용으로 결과를 검토할 수 있다. migration actor만 다음 단계의 통제 기록을 준비할 수 있다. 수신 receipt를 전체 완료나 개발 재개 승인으로 사용하지 않는다.
 
@@ -90,9 +94,9 @@ symlink/hardlink는 lexical target 검사만으로 안전하지 않다. 실제 �
 
 정상 transaction phase는 `planned → migrating_frozen → packaged → delivered → relocated → received_complete → cutover_pending → completed`다. 3단계의 지속 동결은 별도 phase가 아니라 이후 모든 phase의 불변조건이다. `blocked`, `failed`, `partial_commit`, `aborted`는 문서 lifecycle 상태와도 별개다.
 
-실패에는 마지막 검증 phase, blocker, 원인과 재개 조건을 남긴다. 실패 자체가 source freeze를 해제하지 않는다. 단계 건너뛰기나 failed receipt의 상태 수정 대신, 같은 transaction/idempotency key에서 증거를 조회하고 새 correction receipt가 이전 실패 ID를 명시적으로 supersede하도록 한다. 원 실패 bytes와 hash는 유지한다. 참조 `transition`은 순수 checkpoint 비교 함수이며 실제 durable CAS나 append-only 저장소가 아니다.
+실패에는 마지막 검증 phase, blocker, 원인과 재개 조건을 남긴다. 실패/abort 전이는 직전 `last_verified_phase`를 그대로 유지하며, 실패 상태를 통해 새 PASS 증거를 주입하거나 checkpoint를 진전시킬 수 없다. 정상 상태는 `phase == last_verified_phase`여야 하고 실패 후에는 마지막 검증 단계의 바로 다음 정상 단계로만 재개한다. 단계 건너뛰기나 failed receipt의 상태 수정 대신, 같은 transaction/idempotency key에서 증거를 조회하고 새 correction receipt가 이전 실패 ID를 명시적으로 supersede하도록 한다. 원 실패 bytes와 hash는 유지한다. 참조 `transition`은 순수 checkpoint 비교 함수이며 실제 durable CAS나 append-only 저장소가 아니다. 이미 위조된 current checkpoint를 단독 입력하면 저장소 이력까지 인증하지 않으므로, 운영 caller는 신뢰된 직전 상태와 durable CAS를 제공해야 한다.
 
-전환 전 취소는 목적지 미활성·source authority 유지·명시적 취소 승인과 보상 기록을 확인한 뒤 별도 통제 절차로 처리한다. 전환 후 rollback은 목적지 writer를 먼저 정지하고 신규 작업·공유 원장의 후속 event를 백업한다. 새 데이터가 있으면 보존·병합/선택 복구 계획 없이 T0를 덮어쓰지 않는다. 별도 보상 transaction, 증가한 epoch, 승인·복원 receipt와 append-only compensation event를 사용한다. `document-migration-compensation.yaml`은 이를 검증하되 직접 복원·권한 활성화하지 않는다.
+전환 전 취소는 목적지 미활성·source authority 유지·명시적 `abort_approval_ref`와 writer-hold 증적 digest를 확인한 뒤 `aborted`로 기록한다. 정확히 같은 상태의 replay 외에는 terminal이며, 동결을 자동 해제하거나 정상 흐름으로 복귀하지 않는다. 이후에는 별도 승인된 compensation 또는 새 transaction을 사용한다. 전환 후 rollback은 목적지 writer를 먼저 정지하고 신규 작업·공유 원장의 후속 event를 백업한다. 새 데이터가 있으면 보존·병합/선택 복구 계획 없이 T0를 덮어쓰지 않는다. 별도 보상 transaction, 증가한 epoch, 승인·복원 receipt와 append-only compensation event를 사용한다. `document-migration-compensation.yaml`은 이를 검증하되 직접 복원·권한 활성화하지 않는다.
 
 cloud 충돌, offline writer, 미확인 삭제 전파, 공간·권한 문제는 중단 조건이다. 완료나 source 삭제로 수습하지 않는다. 새 범위·source bytes·의존성이 발견되면 새 계획·패키지 revision과 필요한 재승인을 연결한다.
 
@@ -103,28 +107,43 @@ cloud 충돌, offline writer, 미확인 삭제 전파, 공간·권한 문제는 
 | 계획·transaction schema | 승인 digest, scope/ID/parent·owner 관계, 단계별 evidence 결합 | 승인자 신원·유효성, 실제 원본 inventory·외부 의존성 |
 | phase·cutover semantic | 수신/전체 완료/업무 활성화 분리, 양측 필수 evidence·단일 owner·epoch·digest 일치 | 실제 양측 commit, trusted registry/CAS와 포인터 대조 |
 | writer 계약 | memory lock/sync 주장 거부, 중첩·stale/offline 확인 필수 | 모든 실제 writer 차단·fencing proof의 진위·만료 |
-| 안전 archive 해제 | digest 고정 snapshot, 제한형 USTAR/gzip, 모든 링크·특수파일·확장 헤더 거부, no-follow/exclusive private staging, 복원 bytes 재해시 | 승인된 host/root, 저장장치·NAS 복원, 필요한 ACL/xattr/link adapter |
+| 안전 archive 해제 | digest 고정 snapshot, 제한형 USTAR/gzip, 모든 링크·특수파일·확장 헤더 거부, no-follow/exclusive private staging, 복원 bytes 재해시 | 승인된 host/root, 저장장치·외부 백업 복원, 필요한 metadata adapter |
+| opt-in 상대 링크 복원 | 일반 파일 전수 재검증, target 문자열·해시·graph 검증, 마지막 링크 생성·사후 대조 | 실제 writer 정지, 외부 엔진의 의존성·동작 복원 시험 |
+| opt-in chunk-set | bounded streaming, 정확한 offset·part/whole hash·inventory·예산·명시적 resume | 대형 실제 artifact·저장장치 성능/장애·전송·복원 시험 |
+| reference-only | 참조 관리 scope/외부 payload owner 분리, 고정 binding·단계별 증적 | 외부 위치·권한·version/hash·보존/복구의 실제 유효성 |
 | 재개·보상 | identity·plan·이력 불변, 순서·idempotent replay·신규 데이터 보호 계약 | durable 상태 저장·장애 조정·실제 rollback·운영 재개 |
 
-안전 해제기는 기본 archive 256MiB, 전체 해제 stream 272MiB, payload 256MiB, 파일당 64MiB, member 4,096개, 내부 manifest 2MiB로 제한한다. 큰 패키지는 승인 계획에 맞는 분할 또는 별도 검토된 bounded limits/adapter가 필요하다. USTAR 확장(PAX/GNU), sparse file, 링크, executable mode와 특수파일은 지원하지 않는다. 이 제한을 조용히 우회하거나 링크 자료를 누락한 패키지를 완전하다고 표시하지 않는다.
+안전 해제기는 기본 archive 256MiB, 전체 해제 stream 272MiB, payload 256MiB, 파일당 64MiB, member 4,096개, 내부 manifest 2MiB로 제한한다. 이 기본값은 변경하지 않았다. USTAR 확장(PAX/GNU), sparse archive, 링크, executable mode와 특수파일은 지원하지 않는다. 큰 자료는 아래의 별도 chunk-set 형식과 명시 승인된 한도를 사용한다. nested archive/dereference나 링크 누락으로 기본 검사를 우회하지 않는다.
 
 복원은 SHA로 고정된 private snapshot에서 수행하고, parent/child descriptor에 `O_NOFOLLOW`와 새 파일 `O_EXCL`을 사용한다. 실패하면 private partial staging이 남을 수 있으며 완료 receipt를 만들지 않는다. 같은 UID/root의 악의적 동작이나 untrusted parent를 통제하는 보장은 제공하지 않는다. 운영 실행기는 writer quiescence와 신뢰된 parent를 확보해야 한다.
 
-예제는 일반화한 synthetic 데이터이며 실제 실행 증적이 아니다. plan·archive·manifest digest만으로 승인자의 신원을 인증하지 않는다. 본 참조 구현에는 credential, NAS·cloud driver, distributed registry, project registration, payload packager, CAD/solver validator나 자동 cutover가 없다. 실제 이전·업무 재개를 수행하지 않고 계약과 실패 경계만 제공한다.
+예제는 일반화한 synthetic 데이터이며 실제 실행 증적이 아니다. plan·archive·manifest digest만으로 승인자의 신원을 인증하지 않는다. 본 참조 구현에는 credential, 외부 저장소/cloud driver, distributed registry, project registration, 개발/실행 엔진별 validator나 자동 cutover가 없다. opt-in adapter는 로컬 staging/패키지 bytes를 작성하지만 실제 프로젝트 이전·업무 재개 권한을 제공하지 않는다. 이 변경의 시험은 작은 synthetic fixture만 사용하며 실제 자료 호환성·대형 복원 성공을 주장하지 않는다.
 
-### case 내부 상대 링크의 호환성 경로
+### 내부 상대 링크의 opt-in 복원
 
-기본 archive 링크 거부를 해제하거나 파일을 dereference해 복사하거나, 중첩 archive 안으로 링크를 숨겨 검사를 우회하지 않는다. 대신 원 링크를 일반 JSON descriptor로 표현해 원 artifact/revision, 경로, **그대로의 target 문자열과 그 문자열의 SHA-256**, 최종 target의 종류·inventory digest를 보존하는 별도 opt-in 계획을 검토할 수 있다. 생성 코드의 상대 header 링크와 계산 partition의 공용 디렉터리 링크를 일반화한 synthetic 예제를 제공한다.
+기본 archive 링크 거부를 해제하지 않는다. 대신 원 링크를 일반 JSON descriptor로 표현해 원 artifact/revision, 경로, **그대로의 target 문자열과 그 문자열의 SHA-256**, 최종 target의 종류·inventory digest를 보존한다. 생성 리소스의 상대 파일 참조와 분할 실행의 공용 디렉터리 참조를 일반화한 synthetic 예제를 제공한다.
 
-`document-migration-link-policy.yaml`과 `migration_links.py`는 `descriptor_plan_only`다. 정규화 후 root containment, target 존재, cycle, 중간 symlink 경유, Unicode/case/identity 충돌, dangling/absolute/drive/UNC/탈출 경로, target 문자열·inventory hash를 검사한다. `..`가 있다는 이유만으로 모든 내부 상대 링크를 거부하지 않고, 원 문자열을 바꾸지 않은 채 root 밖 탈출 여부를 판정한다. 검증 inventory와 정확히 결합된 4,096개 이하 항목·1,024개 이하 링크, 최대 64단계 chain으로 제한한다.
+`document-migration-link-policy.yaml`의 기본값은 `descriptor_plan_only`/`restore_supported=false`다. 정적 validator는 root containment, target 존재, 링크·디렉터리 순환, 중간 symlink 경유, Unicode/case/identity 충돌, dangling/absolute/drive/UNC/탈출 경로, target 문자열·inventory hash를 검사한다. `..`가 있어도 원 문자열을 바꾸지 않고 root 밖 탈출 여부를 판정한다. 기본 descriptor는 inventory 4,096개·링크 1,024개 이하, chain 64단계 이하로 제한한다.
 
-**실제 filesystem 링크 재구성은 미지원이며 `restore_supported=false`다.** 이 검증 PASS는 runtime target 존재·TOCTOU·원본 metadata 복원 증명이 아니고, descriptor를 복사한 것만으로 링크 포함 자료의 수신/복원 완료를 선언할 수 없다. 실행기는 private staging에서 모든 보통 파일을 전수 검증한 뒤 허용된 링크만 마지막에 재구성하고, descriptor 기반 target 문자열·ID/history/hash, actual containment·중간 링크·후속 member·TOCTOU를 다시 검증하는 adapter를 별도로 구현·검토해야 한다. 실제 CFD 등 링크 필수 자료는 그 adapter와 복원 시험이 통과하기 전까지 패키징/해제 완료 Gate가 차단된다. 대형 자료에 대한 분할·metadata/link adapter도 같은 계획에 명시해야 한다.
+명시 승인된 `document-migration-link-restore.yaml`은 `restore_relative_symlinks`/`restore_supported=true`다. `restore_relative_links`는 승인 policy와 inactive staging receipt를 digest로 결합하고 별도 private state에 claim/실패/완료 기록을 남긴다. inventory·링크 수·payload/file bytes를 승인 한도로 제한한다. 모든 보통 파일을 전수 해시 검증한 후 target-first 순서로 정확히 승인된 링크만 마지막에 생성한다. no-follow dirfd로 target 종류·존재와 파일 hash를 검사하고 링크 원문·전체 tree를 사후 대조한다. 디렉터리 digest는 정렬된 descendant의 상대 path·kind, 파일 SHA, 링크 원문·문자열 SHA를 canonical JSON 배열로 streaming hash한다. inode/time/ACL 복원 증명은 아니다.
+
+기존 파일을 덮어쓰지 않고 symlink parent를 따라 쓰지 않는다. 일반 파일 복원과 링크 복원은 같은 staging flock을 공유한다. 링크 생성 뒤 regular chunk restore는 봉인되어 후속 member 쓰기를 거부한다. 실패 시 partial 링크와 실패 receipt는 남으며 같은 policy·receipt에 대한 명시적 resume 승인만 허용한다. 이 로컬 협력 lock은 분산 fencing이 아니다. 동일 UID/root의 악의적 writer나 untrusted parent를 통제하지 않으므로 운영 quiescence가 필수다.
+
+### 대형 artifact의 bounded chunk-set
+
+`migration_stream.py`의 `pack_chunk_set`/`restore_chunk_set`은 `TRACE-DM-CHUNKSET/1` raw part 형식이다. 하나의 큰 파일도 결정론적 순서의 여러 part로 나누며, package-set에 file path·offset·length·part hash·whole-file hash·exact inventory·plan/config digest를 기록한다. archive SHA와 `package_set_sha256`은 다른 필드이고 서로 대체하지 않는다. 누락·중복·순서·gap/overlap·cross-plan·변조를 거부하며 빈 파일도 inventory로 검증한다. 통제 JSON의 canonical bytes hash까지 검증한다. 압축 archive를 잘게 잘라 링크 검사를 생략하는 방식이 아니다.
+
+`document-migration-stream-policy.yaml`은 기본 disabled 예제다. part 상한 256MiB, I/O buffer 상한 1MiB(예제 64KiB)는 확대할 수 없다. aggregate/file/count/metadata/disk/free-space/temp/failure-retention 한도를 별도 승인 digest에 결합한다. 예제의 aggregate 128GiB·단일 파일 96GiB·metadata 64MiB·bundle/staging 132GiB·free reserve 4GiB는 설정 예시이지 실제 시험 규모나 실행 승인이 아니다. payload는 RAM에 전부 올리지 않고, metadata는 byte/item 수로 제한한다.
+
+pack은 동결 source inventory를 전후 검증하며 part를 exclusive 생성한다. package-set과 완료 receipt가 나오기 전 part는 비활성이다. 중단된 짧은 part는 명시 resume 시 실패 보관함에 격리하고 기존 실패를 보존한다. 완전한 part는 해시 재검증해 재사용한다. restore는 part를 먼저 전수 검증한 뒤 private staging에 재구성하고 파일 전체 hash를 대조한다. 재개 시 기존 prefix와 일치하는 bytes만 인정하고 불일치는 truncate/덮어쓰기 없이 거부한다. source/plan/config 변경·예산 초과는 실패폐쇄하고 자동 재시도하지 않는다.
+
+링크 descriptor가 있으면 regular restore 결과는 `regular_files_verified`/`links_pending`이지 전체 acceptance가 아니다. 링크 adapter의 사후 검증까지 통과해야 한다. hardlink·특수파일, owner/ACL/xattr·실행 권한·sparse extent 재현은 지원하지 않는다(일반 파일 bytes는 private 0600으로 재구성). 이러한 metadata가 필수인 실제 범위는 별도 adapter와 복원 시험 전 차단한다. 외부 전송·NAS/cloud 보존·엔진 의존성·durable CAS는 여전히 실행기 책임이다.
 
 ## 사용과 검증
 
 새 schema는 `schemas/document-migration.schema.json`이며 기존 core schema·문서 enum을 변경하지 않는다. 새 계약 version `0.1.0`을 선택 적용하고, 기존 TRACE-DM `0.2.0` metadata envelope에 companion artifact로 등록한다.
 
-기본 계약 템플릿은 계획·패키지·transaction·경로 map·cutover·보상 6개이며, 링크 descriptor opt-in 검토 템플릿 1개를 별도로 제공한다. 기존 템플릿 13개와 함께 총 20개를 검증한다.
+기본 계약 템플릿 6개에 링크 descriptor·opt-in 복원·streaming policy·package-set·reference-only plan 5개를 더했다. 기존 13개와 함께 총 24개를 검증한다.
 
 ```bash
 .venv/bin/python scripts/validate_templates.py templates/document-migration-plan.yaml
@@ -134,4 +153,4 @@ cloud 충돌, offline writer, 미확인 삭제 전파, 공간·권한 문제는 
 
 승인된 패키지에 한해서는 `trace_gate.migration_archive.extract_verified`를 adapter에서 호출한다. 기대 archive/manifest SHA는 신뢰된 외부 receipt에서 받아야 하고, destination은 새 private staging이어야 한다. 이 API의 `pass`는 안전 해제·파일 검증 결과일 뿐 source freeze, 수신 acceptance, cutover나 업무 활성화가 아니다.
 
-필수 실패 시험은 `tests/test_migration.py`와 `tests/test_migration_archive.py`에 있다. 수신 후 premature write, 양측 cutover 누락, failed/unknown evidence, plan/epoch drift, 중첩 경로·parent closure·shared owner, mixed export, partial commit, 이력 수정, rollback 후 신규 데이터 손실, traversal/drive/UNC/NUL/Unicode/중복 경로, 링크·후속 member/TOCTOU, 특수파일·권한·압축폭탄을 검사한다. 프로젝트 실행기는 실제 writer·NAS·sync·dependency 실패 시험을 추가해야 한다.
+필수 실패 시험은 `tests/test_migration.py`, `test_migration_archive.py`, `test_migration_links.py`, `test_migration_optin.py`, `test_migration_reference.py`에 있다. premature write, cutover 누락, failed/unknown evidence, 위조 failure checkpoint/PASS 주입·abort, plan/epoch drift, parent/shared owner, mixed export, 이력 수정·신규 데이터 손실, path/link/TOCTOU·폭탄, chunk 경계·buffer·예산·부분 실패/재개, reference-only 증적/owner·모드 혼동을 검사한다. 실행기는 실제 writer·외부 저장소·sync·엔진 의존성 실패 시험을 추가해야 한다.

@@ -9,7 +9,7 @@ from trace_gate.validation import TEMPLATE_DIR, load_schema, load_yaml, validate
 def test_all_templates_have_schema_and_pass() -> None:
     jsonschema.Draft202012Validator.check_schema(load_schema())
     paths = validate_templates()
-    assert len(paths) == 20
+    assert len(paths) == 24
 
 
 def test_raw_access_fails_closed_for_lookup() -> None:

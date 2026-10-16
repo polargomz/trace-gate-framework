@@ -1,0 +1,84 @@
+{
+  "schema_version": "0.1.0",
+  "subframework_id": "TRACE-DM",
+  "plan": {
+    "transaction_id": "MIGRATION.EXAMPLE.001",
+    "idempotency_key": "IDEMPOTENCY.EXAMPLE.001",
+    "source": {
+      "partition_id": "PARTITION.SOURCE",
+      "host_id": "HOST.SOURCE",
+      "project_id": "PROJECT.SOURCE",
+      "root": "projects/source"
+    },
+    "destination": {
+      "partition_id": "PARTITION.DESTINATION",
+      "host_id": "HOST.DESTINATION",
+      "project_id": "PROJECT.DESTINATION",
+      "root": "projects/destination"
+    },
+    "scope_paths": [
+      "references"
+    ],
+    "scope_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "cutoff": "2026-01-01T00:00:00Z",
+    "artifacts": [
+      {
+        "artifact_id": "REF.EXAMPLE",
+        "revision_id": "REV.EXAMPLE.1",
+        "path": "references/example.json",
+        "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "canonical_owner": "PARTITION.SOURCE",
+        "parent_ids": [
+          "ARTIFACT.EXTERNAL.DATA"
+        ]
+      }
+    ],
+    "external_parent_ids": [
+      "ARTIFACT.EXTERNAL.DATA"
+    ],
+    "dependency_manifest_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "shared_records": [],
+    "scoped_exports": [],
+    "writer_policy": {
+      "overlap_check_required": true,
+      "stale_and_offline_check_required": true,
+      "freeze_shared_entire_ledger": false
+    },
+    "archive": {
+      "transfer_mode": "copy",
+      "retain_original": true,
+      "retention_policy_ref": "POLICY.EXAMPLE.RETENTION",
+      "store_id": "STORE.ARCHIVE"
+    },
+    "backup": {
+      "independent_store_id": "STORE.BACKUP",
+      "restore_rehearsal_required": true
+    },
+    "rollback": {
+      "strategy": "compensating_events",
+      "preserve_new_data": true,
+      "t0_overwrite_forbidden": true
+    },
+    "migration_mode": "reference_only",
+    "reference_bindings": [
+      {
+        "reference_id": "REF.EXAMPLE",
+        "payload_artifact_id": "ARTIFACT.EXTERNAL.DATA",
+        "canonical_owner": "PARTITION.EXTERNAL",
+        "retained_location": "store://external/immutable/example-v1",
+        "access_policy_ref": "POLICY.EXTERNAL.ACCESS",
+        "version": "VERSION.1",
+        "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "durability_policy_ref": "POLICY.EXTERNAL.RETENTION",
+        "dependency_evidence_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "rollback_evidence_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      }
+    ],
+    "reference_manifest_sha256": "3520753a64208e4cbe26e632fb7cac11575c9c5e336ebdf38236597a6ce199b1"
+  },
+  "approval": {
+    "execution_approval_ref": "APPROVAL.EXAMPLE.REFERENCE_ONLY",
+    "methodology_commit": "1111111111111111111111111111111111111111",
+    "plan_sha256": "588bbd947247049f1203accc05642f6b64e44b0498f659d9146acecc3e3f3af4"
+  }
+}

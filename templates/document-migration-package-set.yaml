@@ -1,0 +1,82 @@
+{
+  "schema_version": "0.1.0",
+  "subframework_id": "TRACE-DM",
+  "format": "TRACE-DM-CHUNKSET/1",
+  "set_id": "PACKAGESET.EXAMPLE.001",
+  "plan_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "source_inventory_sha256": "fd9f585f48bb8608544b0b4b5b23ba1cebebe982d610d29c0df6902aae5f8654",
+  "settings": {
+    "enabled": false,
+    "set_id": "PACKAGESET.EXAMPLE.001",
+    "transaction_id": "MIGRATION.EXAMPLE.001",
+    "idempotency_key": "IDEMPOTENCY.EXAMPLE.001",
+    "plan_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "source_inventory_sha256": "fd9f585f48bb8608544b0b4b5b23ba1cebebe982d610d29c0df6902aae5f8654",
+    "part_bytes": 268435456,
+    "buffer_bytes": 65536,
+    "max_payload_bytes": 137438953472,
+    "max_file_bytes": 103079215104,
+    "max_files": 100000,
+    "max_directories": 100000,
+    "max_parts": 100000,
+    "max_manifest_bytes": 67108864,
+    "max_bundle_bytes": 141733920768,
+    "max_staging_bytes": 141733920768,
+    "minimum_free_bytes": 4294967296,
+    "max_temp_bytes": 536870912,
+    "max_failed_part_bytes": 536870912
+  },
+  "policy": {
+    "schema_version": "0.1.0",
+    "subframework_id": "TRACE-DM",
+    "settings": {
+      "enabled": false,
+      "set_id": "PACKAGESET.EXAMPLE.001",
+      "transaction_id": "MIGRATION.EXAMPLE.001",
+      "idempotency_key": "IDEMPOTENCY.EXAMPLE.001",
+      "plan_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "source_inventory_sha256": "fd9f585f48bb8608544b0b4b5b23ba1cebebe982d610d29c0df6902aae5f8654",
+      "part_bytes": 268435456,
+      "buffer_bytes": 65536,
+      "max_payload_bytes": 137438953472,
+      "max_file_bytes": 103079215104,
+      "max_files": 100000,
+      "max_directories": 100000,
+      "max_parts": 100000,
+      "max_manifest_bytes": 67108864,
+      "max_bundle_bytes": 141733920768,
+      "max_staging_bytes": 141733920768,
+      "minimum_free_bytes": 4294967296,
+      "max_temp_bytes": 536870912,
+      "max_failed_part_bytes": 536870912
+    },
+    "approval": {
+      "approval_ref": "APPROVAL.EXAMPLE.STREAMING",
+      "configuration_sha256": "e6fb47113e1c744aaa8c1bdab4c4b8cea78e0e95aa6d60183bde2a9a8ef15aec",
+      "source_scope_frozen": false,
+      "writer_quiescence_evidence_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    }
+  },
+  "inventory": {
+    "entries": [
+      {
+        "path": "payload",
+        "kind": "directory",
+        "size_bytes": 0,
+        "sha256": "1a432b7d118db4e855393ab287ca644f4d143725fafdf63bcf7010080de4da05",
+        "artifact_id": "DIR.EXAMPLE",
+        "revision_id": "REV.EXAMPLE.1"
+      },
+      {
+        "path": "payload/example.txt",
+        "kind": "file",
+        "size_bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "artifact_id": "ARTIFACT.EXAMPLE",
+        "revision_id": "REV.EXAMPLE.1"
+      }
+    ],
+    "link_policy": null
+  },
+  "parts": []
+}

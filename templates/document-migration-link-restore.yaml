@@ -1,0 +1,53 @@
+{
+  "schema_version": "0.1.0",
+  "subframework_id": "TRACE-DM",
+  "policy_id": "POLICY.EXAMPLE.LINK-DESCRIPTORS",
+  "mode": "restore_relative_symlinks",
+  "restore_supported": true,
+  "verified_inventory_sha256": "ab757de6e5c59cb0cabcf59f31f7589f5ee11756ec05578f02493945a7385205",
+  "inventory": [
+    {
+      "path": "generated/function.h",
+      "kind": "file",
+      "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    },
+    {
+      "path": "run0/shared",
+      "kind": "directory",
+      "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    }
+  ],
+  "links": [
+    {
+      "artifact_id": "LINK.EXAMPLE.0",
+      "revision_id": "REV.EXAMPLE.1",
+      "path": "generated/lnInclude/function.h",
+      "target": "../function.h",
+      "link_text_sha256": "e714b36f9b87d2ddc4d659ceafbbd0b35f89ca963e861999d96c009cfb3f1520",
+      "target_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "target_kind": "file"
+    },
+    {
+      "artifact_id": "LINK.EXAMPLE.1",
+      "revision_id": "REV.EXAMPLE.1",
+      "path": "jobs/shard0/run0/shared",
+      "target": "../../../run0/shared",
+      "link_text_sha256": "25ef1d4796d7cf208b6973210db84016546b149c4a693b622cd6cfb2470af07e",
+      "target_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "target_kind": "directory"
+    }
+  ],
+  "approval": {
+    "enabled": true,
+    "approval_ref": "APPROVAL.EXAMPLE.LINKRESTORE",
+    "source_scope_frozen": true,
+    "writer_quiescence_evidence_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "plan_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "policy_sha256": "0a8c1afb00717939549adf520c4096af47853dbcafa83d30298dcca9b5813b91",
+    "staging_receipt_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "max_inventory_entries": 100000,
+    "max_links": 4096,
+    "max_payload_bytes": 137438953472,
+    "max_file_bytes": 103079215104
+  }
+}

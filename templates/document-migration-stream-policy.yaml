@@ -1,0 +1,31 @@
+{
+  "schema_version": "0.1.0",
+  "subframework_id": "TRACE-DM",
+  "settings": {
+    "enabled": false,
+    "set_id": "PACKAGESET.EXAMPLE.001",
+    "transaction_id": "MIGRATION.EXAMPLE.001",
+    "idempotency_key": "IDEMPOTENCY.EXAMPLE.001",
+    "plan_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "source_inventory_sha256": "fd9f585f48bb8608544b0b4b5b23ba1cebebe982d610d29c0df6902aae5f8654",
+    "part_bytes": 268435456,
+    "buffer_bytes": 65536,
+    "max_payload_bytes": 137438953472,
+    "max_file_bytes": 103079215104,
+    "max_files": 100000,
+    "max_directories": 100000,
+    "max_parts": 100000,
+    "max_manifest_bytes": 67108864,
+    "max_bundle_bytes": 141733920768,
+    "max_staging_bytes": 141733920768,
+    "minimum_free_bytes": 4294967296,
+    "max_temp_bytes": 536870912,
+    "max_failed_part_bytes": 536870912
+  },
+  "approval": {
+    "approval_ref": "APPROVAL.EXAMPLE.STREAMING",
+    "configuration_sha256": "e6fb47113e1c744aaa8c1bdab4c4b8cea78e0e95aa6d60183bde2a9a8ef15aec",
+    "source_scope_frozen": false,
+    "writer_quiescence_evidence_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+  }
+}

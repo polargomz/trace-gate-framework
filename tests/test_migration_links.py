@@ -33,7 +33,7 @@ def test_internal_chain_allowed_but_intermediate_symlink_traversal_refused():
     v=value();entry=deepcopy(v["links"][0]);entry.update(artifact_id="LINK.EXAMPLE.CHAIN",path="generated/alias.h")
     entry["target"]="lnInclude/function.h";entry["link_text_sha256"]=hashlib.sha256(entry["target"].encode()).hexdigest();v["links"].append(entry)
     validate_value(NAME,v)
-    v=value();v["links"][1]["path"]="generated/alias";set_target(v,"../step0/uniform",1)
+    v=value();v["links"][1]["path"]="generated/alias";set_target(v,"../run0/shared",1)
     v["links"][0]["path"]="generated/alias/child.h";set_target(v,"../function.h")
     with pytest.raises(ValueError,match="intermediate symlink"):validate_value(NAME,v)
 

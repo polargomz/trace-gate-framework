@@ -4,7 +4,7 @@
   "policy_id": "POLICY.EXAMPLE.LINK-DESCRIPTORS",
   "mode": "descriptor_plan_only",
   "restore_supported": false,
-  "verified_inventory_sha256": "9b24466163b01877c40fdef88d8c8499c6a221ff3d2f4fa8d1b77855f323c2a6",
+  "verified_inventory_sha256": "ab757de6e5c59cb0cabcf59f31f7589f5ee11756ec05578f02493945a7385205",
   "inventory": [
     {
       "path": "generated/function.h",
@@ -12,7 +12,7 @@
       "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
     },
     {
-      "path": "step0/uniform",
+      "path": "run0/shared",
       "kind": "directory",
       "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
     }
@@ -30,9 +30,9 @@
     {
       "artifact_id": "LINK.EXAMPLE.1",
       "revision_id": "REV.EXAMPLE.1",
-      "path": "workers/unit0/step0/uniform",
-      "target": "../../../step0/uniform",
-      "link_text_sha256": "64a46e9ecf3f96e6d64bd2835d2486e647c4bc405ab046835594b1bf2cd09d54",
+      "path": "jobs/shard0/run0/shared",
+      "target": "../../../run0/shared",
+      "link_text_sha256": "25ef1d4796d7cf208b6973210db84016546b149c4a693b622cd6cfb2470af07e",
       "target_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
       "target_kind": "directory"
     }

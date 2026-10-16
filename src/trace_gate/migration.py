@@ -19,6 +19,11 @@ REQUIRED = {
     "cutover_pending": {"source_transfer", "destination_prepared"},
     "completed": {"pointers_verified", "single_owner_verified", "cutover_verified"},
 }
+REFERENCE_REQUIRED = {**REQUIRED,
+    'packaged':{'reference_manifest_retained','reference_access_verified','reference_version_verified','reference_durability_verified'},
+    'delivered':{'reference_registration_verified'},
+    'relocated':{'reference_dependency_verified','reference_rollback_verified'},
+    'received_complete':{'reference_acceptance'}}
 
 
 def digest(value: Any) -> str:
@@ -95,6 +100,20 @@ def plan_errors(value: dict[str, Any]) -> list[str]:
         require(export["original_chain_preserved"], "mixed ledger chain rewritten")
     require(p["archive"]["transfer_mode"] == "copy" and p["archive"]["retain_original"], "archive must be retained and copied")
     require(p["writer_policy"]["overlap_check_required"] and p["writer_policy"]["stale_and_offline_check_required"], "writer boundary checks required")
+    if p.get('migration_mode','physical_relocation')=='reference_only':
+        refs=p.get('reference_bindings',[])
+        require(bool(refs) and p.get('reference_manifest_sha256')==digest(refs),'reference-only needs a bound reference manifest')
+        require(len({r['reference_id'] for r in refs})==len(refs),'duplicate reference identity')
+        require({r['reference_id'] for r in refs}=={a['artifact_id'] for a in p['artifacts']},'reference scope/identity mismatch')
+        require(not {r['payload_artifact_id'] for r in refs}&{a['artifact_id'] for a in p['artifacts']},'reference-only cannot transfer payload canonical ownership')
+        require({r['payload_artifact_id'] for r in refs}<=set(p['external_parent_ids']),'reference payload parent closure missing')
+        owners={}
+        for r in refs:
+            binding=(r['canonical_owner'],r['version'],r['sha256'],r['retained_location'])
+            require(r['payload_artifact_id'] not in owners or owners[r['payload_artifact_id']]==binding,'multiple reference payload owners/versions')
+            owners[r['payload_artifact_id']]=binding
+    else:
+        require(p.get('reference_manifest_sha256') is None and not p.get('reference_bindings'),'physical plan cannot silently use reference-only bindings')
     return []
 
 
@@ -132,6 +151,11 @@ def cutover_errors(value: dict[str, Any]) -> list[str]:
     require(len({r["artifact_id"] for r in owners}) == len(owners), "multiple canonical owners")
     require(all(r["partition_id"] == value["destination_partition"] for r in owners), "incorrect final owner")
     require(set(value["evidence_sha256"]) == set(value["evidence_ids"]), "cutover evidence digest coverage")
+    if value.get('package_format','single_archive')=='reference_manifest':
+        require(value['archive_sha256'] is None and value.get('package_set_sha256') is None and value.get('reference_manifest_sha256') is not None,'reference completion is not physical package delivery')
+    elif value.get('package_format','single_archive')=='chunk_set':
+        require(value['archive_sha256'] is None and value.get('package_set_sha256') is not None and value.get('reference_manifest_sha256') is None,'chunk-set requires distinct package-set digest')
+    else:require(value['archive_sha256'] is not None and value.get('package_set_sha256') is None and value.get('reference_manifest_sha256') is None,'single archive/set/reference digest ambiguity')
     return []
 
 
@@ -158,14 +182,22 @@ def transaction_errors(value: dict[str, Any]) -> list[str]:
         seen[r["evidence_id"]] = r
     effective = [r for r in receipts if r["evidence_id"] not in superseded]
     passed = {r["kind"] for r in effective if r["result"] == "pass"}
-    needed = set().union(*(REQUIRED.get(s, set()) for s in PHASES[:rank+1]))
+    reference_mode=p.get('migration_mode','physical_relocation')=='reference_only'
+    requirements=REFERENCE_REQUIRED if reference_mode else REQUIRED
+    needed = set().union(*(requirements.get(s, set()) for s in PHASES[:rank+1]))
     require(needed <= passed, "required stage evidence missing or failed")
     if rank >= PHASES.index("packaged"):
-        require(value["archive_sha256"] is not None, "archive digest required")
+        package=value.get('package_format','single_archive')
+        archive=value['archive_sha256'] if package=='single_archive' else value.get('package_set_sha256') if package=='chunk_set' else value.get('reference_manifest_sha256')
+        require(reference_mode==(package=='reference_manifest'),'physical/reference-only evidence modes differ')
+        require(archive is not None and (package=='single_archive' or value['archive_sha256'] is None), "archive/package-set/reference digest required and distinct")
+        if reference_mode:require(archive==p['reference_manifest_sha256'] and value.get('package_set_sha256') is None,'reference manifest binding mismatch')
+        else:
+            require(value.get('reference_manifest_sha256') is None and (package!='single_archive' or value.get('package_set_sha256') is None),'physical package digest ambiguity')
         for r in effective:
-            if r["kind"] in {"package_retained", "delivery_verified"}:
-                require(r["subject_sha256"] == value["archive_sha256"], "retained/delivered archive digest mismatch")
-    if rank > 0:
+            if r["kind"] in {"package_retained", "delivery_verified"} or (reference_mode and r['kind'].startswith('reference_')):
+                require(r["subject_sha256"] == archive, "retained/delivered archive digest mismatch")
+    if rank > 0 or phase == "aborted":
         require(value["source_write_state"] in {"frozen", "preservation_frozen"}, "source scope must remain frozen")
         f = value["fencing"]
         require(f["mechanism"] in {"durable_cas", "coordinator_barrier"}, "memory lock/sync is not distributed fencing")
@@ -181,6 +213,8 @@ def transaction_errors(value: dict[str, Any]) -> list[str]:
         require(c["transaction_id"] == value["transaction_id"] and c["plan_sha256"] == binding and c["scope_sha256"] == p["scope_sha256"], "cutover binding mismatch")
         require(c["source_partition"] == p["source"]["partition_id"] and c["destination_partition"] == p["destination"]["partition_id"], "cutover partition mismatch")
         require(c["archive_sha256"] == value["archive_sha256"], "cutover archive mismatch")
+        require(c.get('package_format','single_archive')==value.get('package_format','single_archive') and c.get('package_set_sha256')==value.get('package_set_sha256'),'cutover package-set mismatch')
+        require(c.get('reference_manifest_sha256')==value.get('reference_manifest_sha256'),'cutover reference manifest mismatch')
         require(c["evidence_ids"] == sorted(r["evidence_id"] for r in receipts), "cutover evidence closure mismatch")
         require(c["evidence_sha256"] == {r["evidence_id"]:digest(r) for r in receipts}, "cutover evidence content mismatch")
         require({r["artifact_id"] for r in c["owners"]} == {r["artifact_id"] for r in p["artifacts"]}, "final owner scope incomplete")
@@ -191,6 +225,9 @@ def transaction_errors(value: dict[str, Any]) -> list[str]:
         require(bool(value["blockers"]) and not value["destination_business_writes"], "failure must hold writes and explain blocker")
     if phase == "partial_commit":
         require(value["source_write_state"] in {"frozen", "preservation_frozen"}, "partial cutover cannot thaw source")
+    if phase == "aborted":
+        require(bool(value.get("abort_approval_ref")) and bool(value.get("abort_hold_evidence_sha256")), "abort needs explicit approval and writer-hold proof")
+        require(value["source_write_state"] in {"frozen", "preservation_frozen"} and not value["destination_business_writes"], "abort must keep both scopes held")
     return []
 
 
@@ -208,6 +245,7 @@ def compensation_errors(value: dict[str, Any]) -> list[str]:
 
 def semantic_errors(name: str, value: dict[str, Any]) -> list[str]:
     functions = {"document-migration-plan.yaml":plan_errors, "document-migration-package.yaml":package_errors,
+                 "document-migration-reference-plan.yaml":plan_errors,
                  "document-relocation-map.yaml":relocation_errors, "document-migration-transaction.yaml":transaction_errors,
                  "document-cutover-receipt.yaml":cutover_errors,
                  "document-migration-compensation.yaml":compensation_errors}
@@ -227,6 +265,12 @@ def transition(current: dict[str, Any], candidate: dict[str, Any]) -> dict[str, 
     if digest(current) == digest(candidate):
         return deepcopy(current)  # Idempotent replay, not a second commit.
     before, after = current["phase"], candidate["phase"]
+    require(before != "aborted", "aborted transaction is terminal; use an authorized compensation/new transaction")
+    failures = {"blocked", "failed", "partial_commit"}
+    if after in failures | {"aborted"}:
+        require(candidate["last_verified_phase"] == current["last_verified_phase"], "failure/abort cannot advance verified checkpoint")
+        prior_ids = {r["evidence_id"] for r in current["evidence"]}
+        require(all(r["result"] != "pass" for r in candidate["evidence"] if r["evidence_id"] not in prior_ids), "failure cannot inject passed-stage evidence")
     if after == "completed" and before != "completed":
         require(candidate["cutover_receipt"]["expected_epoch"] == current["authority_epoch"], "cutover expected epoch stale")
     elif before != "completed":
@@ -236,9 +280,10 @@ def transition(current: dict[str, Any], candidate: dict[str, Any]) -> dict[str, 
         require(after == "completed" and not current["destination_business_writes"] and candidate["destination_business_writes"], "rollback needs separate compensation transaction and new-data backup")
         require({k:v for k,v in current.items() if k not in allowed} == {k:v for k,v in candidate.items() if k not in allowed}, "activation cannot rewrite completed cutover")
         return deepcopy(candidate)
-    if after not in {"blocked", "failed", "partial_commit"}:
+    if after not in failures | {"aborted"}:
         start = PHASES.index(before) if before in PHASES else PHASES.index(current["last_verified_phase"])
-        require(after in PHASES and PHASES.index(after) in {start, start+1}, "migration stage skipped")
+        allowed = {start+1} if before in failures else {start,start+1}
+        require(after in PHASES and PHASES.index(after) in allowed, "migration stage skipped")
     old = {r["evidence_id"]:r for r in current["evidence"]}
     new = {r["evidence_id"]:r for r in candidate["evidence"]}
     require(all(new.get(k) == r for k,r in old.items()), "historical evidence rewritten or deleted")

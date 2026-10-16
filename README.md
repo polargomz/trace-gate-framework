@@ -28,7 +28,7 @@ flowchart LR
 
 - [TRACE Gate Framework 전체 문서](docs/TRACE-GATE-FRAMEWORK.ko.md)
 - [TRACE Document Management Subframework](docs/subframeworks/TRACE-DOCUMENT-MANAGEMENT.ko.md): 문서 정본·계보, 목적 기반 접근과 선택적 그룹 embedding
-- [TRACE-DM 범위별 이전 방법론](docs/subframeworks/TRACE-DM-MIGRATION.ko.md): 수신 완료·양측 cutover·업무 활성화를 분리하는 8단계 계약
+- [TRACE-DM 범위별 이전 방법론](docs/subframeworks/TRACE-DM-MIGRATION.ko.md): 물리 이전/참조-only를 구분하고 수신 완료·양측 cutover·업무 활성화를 분리하는 8단계 계약
 - [TRACE Agent Harness Subframework](docs/subframeworks/TRACE-AGENT-HARNESS.ko.md): model·tool·verification·checkpoint와 선택적 multi-agent 계약
 - [참조 구현 사용 가이드](docs/REFERENCE-IMPLEMENTATION.ko.md)
 - [관리 문서 메타데이터 Manifest](docs/managed-document-manifest.yaml): 저장소 Markdown의 identity·hash·lineage·freshness·access envelope
@@ -70,6 +70,7 @@ flowchart TB
 - `tool-definition.yaml`: tool effect·risk·schema·idempotency 계약
 - `subagent-task.yaml`: 제한된 하위 agent scope·lease·merge 계약
 - `document-migration-*.yaml`, `document-relocation-map.yaml`, `document-cutover-receipt.yaml`: 선택적 이전 계획·패키지·transaction·보상·경로 map·cutover 계약
+- 상대 링크 실제 복원과 대형 artifact chunk-set은 별도 opt-in·승인 한도·명시적 resume를 요구한다. 기본 archive의 링크 거부와 256MiB 한도는 유지한다. synthetic 검증은 실제 외부 저장소·분산 fencing·프로젝트 복원 성공을 뜻하지 않는다.
 
 가장 작은 도입 단위는 다음 네 가지입니다.
 

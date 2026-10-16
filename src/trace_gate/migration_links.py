@@ -25,7 +25,16 @@ def target_path(path: str, target: str) -> str:
 
 def descriptor_errors(value):
     try:
-        require(value["mode"] == "descriptor_plan_only" and not value["restore_supported"], "filesystem link restoration unsupported")
+        require(value["mode"] in {"descriptor_plan_only","restore_relative_symlinks"}, "unsupported link policy")
+        require(value["restore_supported"]==(value["mode"]=="restore_relative_symlinks"), "restore flag/mode mismatch")
+        if value["mode"]=="restore_relative_symlinks":
+            a=value.get('approval',{})
+            require(a.get('enabled') is True and a.get('approval_ref') and a.get('source_scope_frozen') is True, 'explicit opt-in/freeze approval required')
+            require(a.get('policy_sha256')==digest({k:v for k,v in value.items() if k!='approval'}), 'approved link policy digest mismatch')
+        else:
+            require(len(value['inventory'])<=4096 and len(value['links'])<=1024,'default descriptor count bound')
+        if value['mode']=='restore_relative_symlinks':
+            require(len(value['inventory'])<=a['max_inventory_entries'] and len(value['links'])<=a['max_links'],'approved link inventory bound')
         require(digest(value["inventory"]) == value["verified_inventory_sha256"], "link inventory digest mismatch")
         inventory = {r["path"]:r for r in value["inventory"]};links={r["path"]:r for r in value["links"]}
         unique_paths([r["path"] for r in value["inventory"]]+[r["path"] for r in value["links"]])
@@ -51,5 +60,23 @@ def descriptor_errors(value):
             require(final["sha256"]==row["target_sha256"] and final["kind"]==row["target_kind"], "link target inventory mismatch")
             visiting.remove(path);resolved[path]=final;return final
         for path in links:resolve(path)
+        directories={''}|{p for p,r in inventory.items() if r['kind']=='directory'}
+        for path in set(inventory)|set(links):directories.update(str(p) for p in PurePosixPath(path).parents if str(p)!='.')
+        graph={d:set() for d in directories}
+        for d in directories-{''}:
+            parent=str(PurePosixPath(d).parent);graph['' if parent=='.' else parent].add(d)
+        for path,final in resolved.items():
+            if final['kind']=='directory':
+                parent=str(PurePosixPath(path).parent);graph['' if parent=='.' else parent].add(final['path'])
+        incoming={d:0 for d in graph}
+        for children in graph.values():
+            for d in children:incoming[d]+=1
+        pending=[d for d,n in incoming.items() if not n];count=0
+        while pending:
+            d=pending.pop();count+=1
+            for child in graph[d]:
+                incoming[child]-=1
+                if not incoming[child]:pending.append(child)
+        require(count==len(graph), 'directory link cycle')
         return []
     except ValueError as error:return [str(error)]

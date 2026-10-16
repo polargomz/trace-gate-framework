@@ -30,7 +30,10 @@ CI는 같은 검증을 Python 3.12에서 수행한다.
 | `schemas/document-migration.schema.json` | 기존 lifecycle과 분리된 선택적 TRACE-DM-MIGRATION 0.1.0 계약 |
 | `src/trace_gate/migration.py` | scoped plan, 단계·수신/활성화 분리, evidence/cutover digest, 재개·보상 semantic |
 | `src/trace_gate/migration_archive.py` | strict USTAR/gzip digest·파일 검증 및 새 private staging 안전 해제 |
-| `src/trace_gate/migration_links.py` | 내부 상대 링크 descriptor·target graph 검증; 실제 링크 복원은 미지원 |
+| `src/trace_gate/migration_links.py` | 내부 상대 링크 descriptor·target graph·cycle 검증 |
+| `src/trace_gate/migration_link_restore.py` | opt-in private staging의 마지막 상대 symlink 복원·전수 사후 검증 |
+| `src/trace_gate/migration_stream.py` | 별도 bounded raw chunk-set pack/restore·part/whole hash·명시적 resume |
+| `src/trace_gate/migration_io.py` | 공통 no-follow/exclusive I/O·private claim·local stage lock·directory digest |
 | `src/trace_gate/validation.py` | 중복 key, JSON Schema와 semantic validator |
 | `src/trace_gate/gates.py` | 결정적 Gate evaluator와 receipt digest |
 | `src/trace_gate/context.py` | 목적 기반 context selection과 prompt envelope |
@@ -132,10 +135,12 @@ Validator는 repository에서 Markdown을 직접 발견해 manifest coverage와 
 
 ## 9. 선택적 범위별 이전
 
-[8단계 이전 방법론](subframeworks/TRACE-DM-MIGRATION.ko.md)을 적용할 때 새 migration 템플릿 6개를 사용한다. 기존 document lifecycle/schema는 그대로 유지한다. `received_complete`는 업무 활성화와 분리하며, 단일 bilateral cutover receipt가 있는 `completed` 상태도 별도 업무 재개 승인이 있어야 한다.
+[8단계 이전 방법론](subframeworks/TRACE-DM-MIGRATION.ko.md)은 기본 계약 6개와 opt-in/참조 계약 5개를 제공한다(전체 template 24개). 기존 document lifecycle/core schema는 그대로 유지한다. `received_complete`는 업무 활성화와 분리하며, 단일 bilateral cutover receipt가 있는 `completed` 상태도 별도 업무 재개 승인이 있어야 한다.
 
-내부 상대 링크용 추가 template 1개는 descriptor 검토만 제공한다. `restore_supported=false`이며 실제 링크 복원·CFD 이전 완료를 허용하지 않는다. 원 target 문자열·ID/hash 보존과 runtime TOCTOU까지 검증하는 별도 adapter가 필요하다. 기본 archive의 링크 거부, 크기 제한을 끄거나 중첩 archive/dereference로 우회하지 않는다.
+기본 link policy는 descriptor-only다. 별도 승인 `document-migration-link-restore.yaml`과 `restore_relative_links`를 선택하면 일반 파일 hash를 전수 대조한 뒤 상대 symlink를 마지막에 재구성하고 전체 tree/target 문자열을 재검증한다. stage flock은 regular restore와 공유하고 링크 생성 후 regular writes는 거부한다. 기본 archive의 링크 거부를 끄거나 중첩 archive/dereference로 우회하지 않는다. same-UID/root 악성 writer는 이 로컬 통제의 보장 범위 밖이다.
 
-`transition`은 검증된 checkpoint의 순수 비교·재개 모델이고 저장소 CAS가 아니다. `extract_verified`는 trusted receipt에서 받은 archive/내부 manifest SHA와 새 staging을 요구한다. 제한형 USTAR/gzip의 모든 링크·특수파일·확장 헤더를 거부하고 복원 파일을 재해시한다. 성공해도 실제 source freeze·canonical ownership·NAS 복원·프로젝트 등록·업무 재개를 실행하지 않는다. synthetic fixture만으로 운영 분산 fencing을 검증했다고 주장하지 않는다.
+`transition`은 검증된 checkpoint의 순수 비교·재개 모델이고 저장소 CAS가 아니다. failure checkpoint 상승/PASS 증거 주입을 거부하며 명시 승인된 abort는 writer-hold 상태로 종료한다. 신뢰된 current 상태는 caller 책임이다. `extract_verified`는 trusted receipt의 archive/내부 manifest SHA와 새 staging을 요구하고 제한형 USTAR/gzip의 모든 링크·특수파일·확장 헤더를 거부한다. 기본 archive 256MiB 제한은 변경하지 않았다.
 
-기본 크기 제한, 권한·동시성 가정과 미지원 link/ACL/xattr/대형 데이터 처리는 방법론의 구현 경계를 따른다. 실제 migration adapter는 사용자 실행 승인과 확정된 방법론 commit, 외부 writer/backup/restore/dependency 증적을 결합해야 한다.
+대형 artifact에는 기본 disabled streaming policy를 별도 승인해 `pack_chunk_set`/`restore_chunk_set`을 사용한다. raw part 상한 256MiB, buffer 상한 1MiB, metadata/item·aggregate/file·temp/disk 한도를 검증한다. 단일 파일 offset·part/whole hash, inventory closure, 부분 실패 보존과 동일 정책의 명시적 resume를 제공한다. 링크가 남으면 `regular_files_verified`일 뿐 전체 acceptance가 아니다. owner/ACL/xattr/실행권한/sparse extent와 엔진별 의존성 복원은 미지원이며 필수이면 차단한다.
+
+`reference_only`는 외부 payload 대신 참조 metadata를 이전하는 명시 승인 모드다. 외부 canonical owner·위치·권한·고정 version/hash·지속성·dependency/rollback binding과 별도 reference evidence를 검증하고 payload 전달 완료로 오인하지 않는다. 물리 이전과 package-set/reference manifest digest를 섞거나 자동 모드 전환할 수 없다. 실제 migration adapter는 사용자 실행 승인·확정된 방법론 commit·외부 writer/backup/restore/dependency 증적을 결합해야 한다. synthetic fixture만으로 운영 분산 fencing·외부 저장소·대형 프로젝트 복원을 검증했다고 주장하지 않는다.
