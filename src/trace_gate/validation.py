@@ -31,6 +31,13 @@ TEMPLATE_SCHEMAS = {
     "agent-run.yaml": "agentRun",
     "tool-definition.yaml": "toolDefinition",
     "subagent-task.yaml": "subagentTask",
+    "document-migration-plan.yaml": "migrationPlan",
+    "document-migration-package.yaml": "migrationPackage",
+    "document-relocation-map.yaml": "relocationMap",
+    "document-cutover-receipt.yaml": "cutoverReceipt",
+    "document-migration-transaction.yaml": "migrationTransaction",
+    "document-migration-compensation.yaml": "migrationCompensation",
+    "document-migration-link-policy.yaml": "migrationLinkPolicy",
 }
 SCHEMA_MAPPINGS = {
     **TEMPLATE_SCHEMAS,
@@ -221,12 +228,22 @@ def validate_value(name: str, value: dict[str, Any]) -> None:
     schema_name = SCHEMA_MAPPINGS.get(name)
     if schema_name is None:
         raise ValueError(f"no schema mapping for {name}")
-    root_schema = load_schema()
+    is_migration = name in {"document-migration-plan.yaml", "document-migration-package.yaml", "document-relocation-map.yaml", "document-cutover-receipt.yaml", "document-migration-transaction.yaml", "document-migration-compensation.yaml", "document-migration-link-policy.yaml"}
+    root_schema = json.loads((ROOT / "schemas/document-migration.schema.json").read_text()) if is_migration else load_schema()
     schema = {"$ref": f"#/$defs/{schema_name}", **root_schema}
     validator = jsonschema.Draft202012Validator(schema)
     schema_errors = sorted(validator.iter_errors(value), key=lambda error: list(error.path))
     messages = [error.message for error in schema_errors]
-    messages.extend(semantic_errors(name, value))
+    if is_migration:
+        if not schema_errors:
+            if name == "document-migration-link-policy.yaml":
+                from .migration_links import descriptor_errors
+                messages.extend(descriptor_errors(value))
+            else:
+                from .migration import semantic_errors as migration_errors
+                messages.extend(migration_errors(name, value))
+    else:
+        messages.extend(semantic_errors(name, value))
     if messages:
         raise ValueError(f"{name}: " + "; ".join(messages))
 

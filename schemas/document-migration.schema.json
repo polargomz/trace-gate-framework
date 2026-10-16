@@ -1,0 +1,1158 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://trace-gate.dev/schemas/document-migration.schema.json",
+  "title": "TRACE-DM additive scoped migration contracts 0.1.0",
+  "$defs": {
+    "migrationPlan": {
+      "type": "object",
+      "properties": {
+        "schema_version": {
+          "const": "0.1.0"
+        },
+        "subframework_id": {
+          "const": "TRACE-DM"
+        },
+        "plan": {
+          "type": "object",
+          "properties": {
+            "transaction_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$",
+              "minLength": 3
+            },
+            "idempotency_key": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$",
+              "minLength": 3
+            },
+            "source": {
+              "type": "object",
+              "properties": {
+                "partition_id": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$",
+                  "minLength": 3
+                },
+                "host_id": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$",
+                  "minLength": 3
+                },
+                "project_id": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$",
+                  "minLength": 3
+                },
+                "root": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              },
+              "required": [
+                "partition_id",
+                "host_id",
+                "project_id",
+                "root"
+              ],
+              "additionalProperties": false
+            },
+            "destination": {
+              "type": "object",
+              "properties": {
+                "partition_id": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$",
+                  "minLength": 3
+                },
+                "host_id": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$",
+                  "minLength": 3
+                },
+                "project_id": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$",
+                  "minLength": 3
+                },
+                "root": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              },
+              "required": [
+                "partition_id",
+                "host_id",
+                "project_id",
+                "root"
+              ],
+              "additionalProperties": false
+            },
+            "scope_paths": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1
+              },
+              "uniqueItems": true,
+              "minItems": 1
+            },
+            "scope_sha256": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            },
+            "cutoff": {
+              "type": "string",
+              "minLength": 1
+            },
+            "artifacts": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "artifact_id": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$",
+                    "minLength": 3
+                  },
+                  "revision_id": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$",
+                    "minLength": 3
+                  },
+                  "path": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "sha256": {
+                    "type": "string",
+                    "pattern": "^[a-f0-9]{64}$"
+                  },
+                  "canonical_owner": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$",
+                    "minLength": 3
+                  },
+                  "parent_ids": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "uniqueItems": true
+                  }
+                },
+                "required": [
+                  "artifact_id",
+                  "revision_id",
+                  "path",
+                  "sha256",
+                  "canonical_owner",
+                  "parent_ids"
+                ],
+                "additionalProperties": false
+              },
+              "minItems": 1
+            },
+            "external_parent_ids": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1
+              },
+              "uniqueItems": true
+            },
+            "dependency_manifest_sha256": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            },
+            "shared_records": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "artifact_id": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$",
+                    "minLength": 3
+                  },
+                  "canonical_owner": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$",
+                    "minLength": 3
+                  },
+                  "transfer": {
+                    "const": false
+                  }
+                },
+                "required": [
+                  "artifact_id",
+                  "canonical_owner",
+                  "transfer"
+                ],
+                "additionalProperties": false
+              },
+              "minItems": 0
+            },
+            "scoped_exports": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "source_artifact_id": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$",
+                    "minLength": 3
+                  },
+                  "original_ledger_sha256": {
+                    "type": "string",
+                    "pattern": "^[a-f0-9]{64}$"
+                  },
+                  "original_anchor_sha256": {
+                    "type": "string",
+                    "pattern": "^[a-f0-9]{64}$"
+                  },
+                  "selection_sha256": {
+                    "type": "string",
+                    "pattern": "^[a-f0-9]{64}$"
+                  },
+                  "export_sha256": {
+                    "type": "string",
+                    "pattern": "^[a-f0-9]{64}$"
+                  },
+                  "parent_ids": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "uniqueItems": true
+                  },
+                  "original_chain_preserved": {
+                    "const": true
+                  }
+                },
+                "required": [
+                  "source_artifact_id",
+                  "original_ledger_sha256",
+                  "original_anchor_sha256",
+                  "selection_sha256",
+                  "export_sha256",
+                  "parent_ids",
+                  "original_chain_preserved"
+                ],
+                "additionalProperties": false
+              },
+              "minItems": 0
+            },
+            "writer_policy": {
+              "type": "object",
+              "properties": {
+                "overlap_check_required": {
+                  "const": true
+                },
+                "stale_and_offline_check_required": {
+                  "const": true
+                },
+                "freeze_shared_entire_ledger": {
+                  "const": false
+                }
+              },
+              "required": [
+                "overlap_check_required",
+                "stale_and_offline_check_required",
+                "freeze_shared_entire_ledger"
+              ],
+              "additionalProperties": false
+            },
+            "archive": {
+              "type": "object",
+              "properties": {
+                "transfer_mode": {
+                  "const": "copy"
+                },
+                "retain_original": {
+                  "const": true
+                },
+                "retention_policy_ref": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "store_id": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$",
+                  "minLength": 3
+                }
+              },
+              "required": [
+                "transfer_mode",
+                "retain_original",
+                "retention_policy_ref",
+                "store_id"
+              ],
+              "additionalProperties": false
+            },
+            "backup": {
+              "type": "object",
+              "properties": {
+                "independent_store_id": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$",
+                  "minLength": 3
+                },
+                "restore_rehearsal_required": {
+                  "const": true
+                }
+              },
+              "required": [
+                "independent_store_id",
+                "restore_rehearsal_required"
+              ],
+              "additionalProperties": false
+            },
+            "rollback": {
+              "type": "object",
+              "properties": {
+                "strategy": {
+                  "const": "compensating_events"
+                },
+                "preserve_new_data": {
+                  "const": true
+                },
+                "t0_overwrite_forbidden": {
+                  "const": true
+                }
+              },
+              "required": [
+                "strategy",
+                "preserve_new_data",
+                "t0_overwrite_forbidden"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "transaction_id",
+            "idempotency_key",
+            "source",
+            "destination",
+            "scope_paths",
+            "scope_sha256",
+            "cutoff",
+            "artifacts",
+            "external_parent_ids",
+            "dependency_manifest_sha256",
+            "shared_records",
+            "scoped_exports",
+            "writer_policy",
+            "archive",
+            "backup",
+            "rollback"
+          ],
+          "additionalProperties": false
+        },
+        "approval": {
+          "type": "object",
+          "properties": {
+            "execution_approval_ref": {
+              "type": "string",
+              "minLength": 1
+            },
+            "methodology_commit": {
+              "type": "string",
+              "pattern": "^(?:[a-f0-9]{40}|[a-f0-9]{64})$"
+            },
+            "plan_sha256": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            }
+          },
+          "required": [
+            "execution_approval_ref",
+            "methodology_commit",
+            "plan_sha256"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "schema_version",
+        "subframework_id",
+        "plan",
+        "approval"
+      ],
+      "additionalProperties": false
+    },
+    "migrationPackage": {
+      "type": "object",
+      "properties": {
+        "schema_version": {
+          "const": "0.1.0"
+        },
+        "subframework_id": {
+          "const": "TRACE-DM"
+        },
+        "transaction_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$",
+          "minLength": 3
+        },
+        "plan_sha256": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "scope_sha256": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "files": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "path": {
+                "type": "string",
+                "minLength": 1
+              },
+              "size_bytes": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "sha256": {
+                "type": "string",
+                "pattern": "^[a-f0-9]{64}$"
+              },
+              "artifact_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$",
+                "minLength": 3
+              },
+              "revision_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$",
+                "minLength": 3
+              }
+            },
+            "required": [
+              "path",
+              "size_bytes",
+              "sha256",
+              "artifact_id",
+              "revision_id"
+            ],
+            "additionalProperties": false
+          },
+          "minItems": 1
+        }
+      },
+      "required": [
+        "schema_version",
+        "subframework_id",
+        "transaction_id",
+        "plan_sha256",
+        "scope_sha256",
+        "files"
+      ],
+      "additionalProperties": false
+    },
+    "relocationMap": {
+      "type": "object",
+      "properties": {
+        "schema_version": {
+          "const": "0.1.0"
+        },
+        "subframework_id": {
+          "const": "TRACE-DM"
+        },
+        "transaction_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$",
+          "minLength": 3
+        },
+        "plan_sha256": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "maps": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "artifact_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$",
+                "minLength": 3
+              },
+              "old_revision_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$",
+                "minLength": 3
+              },
+              "new_revision_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$",
+                "minLength": 3
+              },
+              "old_management_revision": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$",
+                "minLength": 3
+              },
+              "new_management_revision": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$",
+                "minLength": 3
+              },
+              "old_path": {
+                "type": "string",
+                "minLength": 1
+              },
+              "new_path": {
+                "type": "string",
+                "minLength": 1
+              },
+              "old_sha256": {
+                "type": "string",
+                "pattern": "^[a-f0-9]{64}$"
+              },
+              "new_sha256": {
+                "type": "string",
+                "pattern": "^[a-f0-9]{64}$"
+              },
+              "content_changed": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "artifact_id",
+              "old_revision_id",
+              "new_revision_id",
+              "old_management_revision",
+              "new_management_revision",
+              "old_path",
+              "new_path",
+              "old_sha256",
+              "new_sha256",
+              "content_changed"
+            ],
+            "additionalProperties": false
+          },
+          "minItems": 1
+        }
+      },
+      "required": [
+        "schema_version",
+        "subframework_id",
+        "transaction_id",
+        "plan_sha256",
+        "maps"
+      ],
+      "additionalProperties": false
+    },
+    "cutoverReceipt": {
+      "type": "object",
+      "properties": {
+        "schema_version": {
+          "const": "0.1.0"
+        },
+        "subframework_id": {
+          "const": "TRACE-DM"
+        },
+        "transaction_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$",
+          "minLength": 3
+        },
+        "plan_sha256": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "scope_sha256": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "archive_sha256": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "source_partition": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$",
+          "minLength": 3
+        },
+        "destination_partition": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$",
+          "minLength": 3
+        },
+        "expected_epoch": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "new_epoch": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "source_preservation_frozen": {
+          "type": "boolean"
+        },
+        "destination_accepted": {
+          "type": "boolean"
+        },
+        "bilateral_verified": {
+          "type": "boolean"
+        },
+        "owners": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "artifact_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$",
+                "minLength": 3
+              },
+              "partition_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$",
+                "minLength": 3
+              }
+            },
+            "required": [
+              "artifact_id",
+              "partition_id"
+            ],
+            "additionalProperties": false
+          },
+          "minItems": 1
+        },
+        "evidence_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true,
+          "minItems": 1
+        },
+        "evidence_sha256": {
+          "type": "object",
+          "minProperties": 1,
+          "additionalProperties": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          }
+        },
+        "receipt_sha256": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        }
+      },
+      "required": [
+        "schema_version",
+        "subframework_id",
+        "transaction_id",
+        "plan_sha256",
+        "scope_sha256",
+        "archive_sha256",
+        "source_partition",
+        "destination_partition",
+        "expected_epoch",
+        "new_epoch",
+        "source_preservation_frozen",
+        "destination_accepted",
+        "bilateral_verified",
+        "owners",
+        "evidence_ids",
+        "evidence_sha256",
+        "receipt_sha256"
+      ],
+      "additionalProperties": false
+    },
+    "migrationTransaction": {
+      "type": "object",
+      "properties": {
+        "schema_version": {
+          "const": "0.1.0"
+        },
+        "subframework_id": {
+          "const": "TRACE-DM"
+        },
+        "transaction_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$",
+          "minLength": 3
+        },
+        "idempotency_key": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$",
+          "minLength": 3
+        },
+        "migration_plan": {
+          "$ref": "#/$defs/migrationPlan"
+        },
+        "phase": {
+          "enum": [
+            "planned",
+            "migrating_frozen",
+            "packaged",
+            "delivered",
+            "relocated",
+            "received_complete",
+            "cutover_pending",
+            "completed",
+            "blocked",
+            "failed",
+            "partial_commit",
+            "aborted"
+          ]
+        },
+        "last_verified_phase": {
+          "enum": [
+            "planned",
+            "migrating_frozen",
+            "packaged",
+            "delivered",
+            "relocated",
+            "received_complete",
+            "cutover_pending",
+            "completed"
+          ]
+        },
+        "source_write_state": {
+          "enum": [
+            "active",
+            "frozen",
+            "preservation_frozen"
+          ]
+        },
+        "destination_business_writes": {
+          "type": "boolean"
+        },
+        "canonical_owner": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "authority_epoch": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "fencing": {
+          "type": "object",
+          "properties": {
+            "mechanism": {
+              "enum": [
+                "unverified",
+                "durable_cas",
+                "coordinator_barrier",
+                "memory_lock",
+                "cloud_sync"
+              ]
+            },
+            "verified": {
+              "type": "boolean"
+            },
+            "proof_sha256": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            },
+            "writer_inventory_sha256": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            },
+            "all_writers_quiescent": {
+              "type": "boolean"
+            },
+            "overlap_checked": {
+              "type": "boolean"
+            },
+            "stale_writer_checked": {
+              "type": "boolean"
+            },
+            "offline_writer_checked": {
+              "type": "boolean"
+            },
+            "scope_only": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "mechanism",
+            "verified",
+            "proof_sha256",
+            "writer_inventory_sha256",
+            "all_writers_quiescent",
+            "overlap_checked",
+            "stale_writer_checked",
+            "offline_writer_checked",
+            "scope_only"
+          ],
+          "additionalProperties": false
+        },
+        "archive_sha256": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "evidence": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "evidence_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$",
+                "minLength": 3
+              },
+              "kind": {
+                "enum": [
+                  "backup",
+                  "cutover_verified",
+                  "delivery_verified",
+                  "dependency_verified",
+                  "destination_acceptance",
+                  "destination_prepared",
+                  "package_retained",
+                  "pointers_verified",
+                  "relocation_verified",
+                  "restore_rehearsal",
+                  "safe_extraction",
+                  "scope_freeze",
+                  "scope_verified",
+                  "single_owner_verified",
+                  "source_transfer",
+                  "writer_quiescence_verified"
+                ]
+              },
+              "transaction_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$",
+                "minLength": 3
+              },
+              "plan_sha256": {
+                "type": "string",
+                "pattern": "^[a-f0-9]{64}$"
+              },
+              "scope_sha256": {
+                "type": "string",
+                "pattern": "^[a-f0-9]{64}$"
+              },
+              "subject_sha256": {
+                "type": "string",
+                "pattern": "^[a-f0-9]{64}$"
+              },
+              "result": {
+                "enum": [
+                  "pass",
+                  "fail",
+                  "blocked",
+                  "unknown"
+                ]
+              },
+              "verifier_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$",
+                "minLength": 3
+              },
+              "verified_at": {
+                "type": "string",
+                "minLength": 1
+              },
+              "supersedes_evidence_ids": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "uniqueItems": true
+              }
+            },
+            "required": [
+              "evidence_id",
+              "kind",
+              "transaction_id",
+              "plan_sha256",
+              "scope_sha256",
+              "subject_sha256",
+              "result",
+              "verifier_id",
+              "verified_at",
+              "supersedes_evidence_ids"
+            ],
+            "additionalProperties": false
+          },
+          "minItems": 0
+        },
+        "blockers": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true
+        },
+        "business_resume_approval_ref": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "cutover_receipt": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/cutoverReceipt"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "schema_version",
+        "subframework_id",
+        "transaction_id",
+        "idempotency_key",
+        "migration_plan",
+        "phase",
+        "last_verified_phase",
+        "source_write_state",
+        "destination_business_writes",
+        "canonical_owner",
+        "authority_epoch",
+        "fencing",
+        "archive_sha256",
+        "evidence",
+        "blockers",
+        "business_resume_approval_ref",
+        "cutover_receipt"
+      ],
+      "additionalProperties": false
+    },
+    "migrationCompensation": {
+      "type": "object",
+      "properties": {
+        "schema_version": {
+          "const": "0.1.0"
+        },
+        "subframework_id": {
+          "const": "TRACE-DM"
+        },
+        "original_transaction_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$",
+          "minLength": 3
+        },
+        "compensation_transaction_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$",
+          "minLength": 3
+        },
+        "compensates_receipt_sha256": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "rollback_approval_ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "destination_quiesced": {
+          "type": "boolean"
+        },
+        "new_data_present": {
+          "type": "boolean"
+        },
+        "new_data_preserved": {
+          "type": "boolean"
+        },
+        "new_data_backup_sha256": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "previous_epoch": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "new_epoch": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "restore_receipt_sha256": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "restore_verified": {
+          "type": "boolean"
+        },
+        "events_append_only": {
+          "const": true
+        },
+        "t0_overwrite": {
+          "const": false
+        },
+        "business_writes_enabled": {
+          "const": false
+        },
+        "result": {
+          "enum": [
+            "pass",
+            "blocked",
+            "fail"
+          ]
+        },
+        "blockers": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true
+        }
+      },
+      "required": [
+        "schema_version",
+        "subframework_id",
+        "original_transaction_id",
+        "compensation_transaction_id",
+        "compensates_receipt_sha256",
+        "rollback_approval_ref",
+        "destination_quiesced",
+        "new_data_present",
+        "new_data_preserved",
+        "new_data_backup_sha256",
+        "previous_epoch",
+        "new_epoch",
+        "restore_receipt_sha256",
+        "restore_verified",
+        "events_append_only",
+        "t0_overwrite",
+        "business_writes_enabled",
+        "result",
+        "blockers"
+      ],
+      "additionalProperties": false
+    },
+    "migrationLinkPolicy": {
+      "type": "object",
+      "properties": {
+        "schema_version": {
+          "const": "0.1.0"
+        },
+        "subframework_id": {
+          "const": "TRACE-DM"
+        },
+        "policy_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "mode": {
+          "const": "descriptor_plan_only"
+        },
+        "restore_supported": {
+          "const": false
+        },
+        "verified_inventory_sha256": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "inventory": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 4096,
+          "items": {
+            "type": "object",
+            "properties": {
+              "path": {
+                "type": "string",
+                "minLength": 1
+              },
+              "kind": {
+                "enum": [
+                  "file",
+                  "directory"
+                ]
+              },
+              "sha256": {
+                "type": "string",
+                "pattern": "^[a-f0-9]{64}$"
+              }
+            },
+            "required": [
+              "path",
+              "kind",
+              "sha256"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "links": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 1024,
+          "items": {
+            "type": "object",
+            "properties": {
+              "artifact_id": {
+                "type": "string",
+                "minLength": 1
+              },
+              "revision_id": {
+                "type": "string",
+                "minLength": 1
+              },
+              "path": {
+                "type": "string",
+                "minLength": 1
+              },
+              "target": {
+                "type": "string",
+                "minLength": 1
+              },
+              "link_text_sha256": {
+                "type": "string",
+                "pattern": "^[a-f0-9]{64}$"
+              },
+              "target_sha256": {
+                "type": "string",
+                "pattern": "^[a-f0-9]{64}$"
+              },
+              "target_kind": {
+                "enum": [
+                  "file",
+                  "directory"
+                ]
+              }
+            },
+            "required": [
+              "artifact_id",
+              "revision_id",
+              "path",
+              "target",
+              "link_text_sha256",
+              "target_sha256",
+              "target_kind"
+            ],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": [
+        "schema_version",
+        "subframework_id",
+        "policy_id",
+        "mode",
+        "restore_supported",
+        "verified_inventory_sha256",
+        "inventory",
+        "links"
+      ],
+      "additionalProperties": false
+    }
+  }
+}

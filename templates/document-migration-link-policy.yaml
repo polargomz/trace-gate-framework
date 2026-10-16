@@ -1,0 +1,40 @@
+{
+  "schema_version": "0.1.0",
+  "subframework_id": "TRACE-DM",
+  "policy_id": "POLICY.EXAMPLE.LINK-DESCRIPTORS",
+  "mode": "descriptor_plan_only",
+  "restore_supported": false,
+  "verified_inventory_sha256": "9b24466163b01877c40fdef88d8c8499c6a221ff3d2f4fa8d1b77855f323c2a6",
+  "inventory": [
+    {
+      "path": "generated/function.h",
+      "kind": "file",
+      "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    },
+    {
+      "path": "step0/uniform",
+      "kind": "directory",
+      "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    }
+  ],
+  "links": [
+    {
+      "artifact_id": "LINK.EXAMPLE.0",
+      "revision_id": "REV.EXAMPLE.1",
+      "path": "generated/lnInclude/function.h",
+      "target": "../function.h",
+      "link_text_sha256": "e714b36f9b87d2ddc4d659ceafbbd0b35f89ca963e861999d96c009cfb3f1520",
+      "target_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "target_kind": "file"
+    },
+    {
+      "artifact_id": "LINK.EXAMPLE.1",
+      "revision_id": "REV.EXAMPLE.1",
+      "path": "workers/unit0/step0/uniform",
+      "target": "../../../step0/uniform",
+      "link_text_sha256": "64a46e9ecf3f96e6d64bd2835d2486e647c4bc405ab046835594b1bf2cd09d54",
+      "target_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "target_kind": "directory"
+    }
+  ]
+}

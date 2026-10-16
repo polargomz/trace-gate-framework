@@ -1,0 +1,28 @@
+{
+  "schema_version": "0.1.0",
+  "subframework_id": "TRACE-DM",
+  "transaction_id": "MIGRATION.EXAMPLE.001",
+  "plan_sha256": "fe9f88e9cb827f6e352690991db08f82cbe0c78f0bf8ab632d511a8a2bd7b749",
+  "scope_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "archive_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "source_partition": "PARTITION.SOURCE",
+  "destination_partition": "PARTITION.DESTINATION",
+  "expected_epoch": 1,
+  "new_epoch": 2,
+  "source_preservation_frozen": true,
+  "destination_accepted": true,
+  "bilateral_verified": true,
+  "owners": [
+    {
+      "artifact_id": "ARTIFACT.EXAMPLE",
+      "partition_id": "PARTITION.DESTINATION"
+    }
+  ],
+  "evidence_ids": [
+    "EVIDENCE.EXAMPLE.SYNTHETIC"
+  ],
+  "evidence_sha256": {
+    "EVIDENCE.EXAMPLE.SYNTHETIC": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+  },
+  "receipt_sha256": "23379c5237e444f43deb1fc0eae5405efeddcd301430c308d1e1c11965caf563"
+}

@@ -27,6 +27,10 @@ CI는 같은 검증을 Python 3.12에서 수행한다.
 | 경로 | 역할 |
 |---|---|
 | `schemas/trace-gate.schema.json` | core, TRACE-DM, TRACE-AH 계약 schema |
+| `schemas/document-migration.schema.json` | 기존 lifecycle과 분리된 선택적 TRACE-DM-MIGRATION 0.1.0 계약 |
+| `src/trace_gate/migration.py` | scoped plan, 단계·수신/활성화 분리, evidence/cutover digest, 재개·보상 semantic |
+| `src/trace_gate/migration_archive.py` | strict USTAR/gzip digest·파일 검증 및 새 private staging 안전 해제 |
+| `src/trace_gate/migration_links.py` | 내부 상대 링크 descriptor·target graph 검증; 실제 링크 복원은 미지원 |
 | `src/trace_gate/validation.py` | 중복 key, JSON Schema와 semantic validator |
 | `src/trace_gate/gates.py` | 결정적 Gate evaluator와 receipt digest |
 | `src/trace_gate/context.py` | 목적 기반 context selection과 prompt envelope |
@@ -125,3 +129,13 @@ Evaluator는 다음을 보장한다.
 Validator는 repository에서 Markdown을 직접 발견해 manifest coverage와 content-derived revision을 대조한다. Manifest 자체는 자기 hash를 포함하지 않으며 등록한 문서만 SHA-256과 size를 가진다.
 
 이 제한은 권한을 넓혀 우회하지 않고 구현별 Evidence와 Unknown으로 기록한다.
+
+## 9. 선택적 범위별 이전
+
+[8단계 이전 방법론](subframeworks/TRACE-DM-MIGRATION.ko.md)을 적용할 때 새 migration 템플릿 6개를 사용한다. 기존 document lifecycle/schema는 그대로 유지한다. `received_complete`는 업무 활성화와 분리하며, 단일 bilateral cutover receipt가 있는 `completed` 상태도 별도 업무 재개 승인이 있어야 한다.
+
+내부 상대 링크용 추가 template 1개는 descriptor 검토만 제공한다. `restore_supported=false`이며 실제 링크 복원·CFD 이전 완료를 허용하지 않는다. 원 target 문자열·ID/hash 보존과 runtime TOCTOU까지 검증하는 별도 adapter가 필요하다. 기본 archive의 링크 거부, 크기 제한을 끄거나 중첩 archive/dereference로 우회하지 않는다.
+
+`transition`은 검증된 checkpoint의 순수 비교·재개 모델이고 저장소 CAS가 아니다. `extract_verified`는 trusted receipt에서 받은 archive/내부 manifest SHA와 새 staging을 요구한다. 제한형 USTAR/gzip의 모든 링크·특수파일·확장 헤더를 거부하고 복원 파일을 재해시한다. 성공해도 실제 source freeze·canonical ownership·NAS 복원·프로젝트 등록·업무 재개를 실행하지 않는다. synthetic fixture만으로 운영 분산 fencing을 검증했다고 주장하지 않는다.
+
+기본 크기 제한, 권한·동시성 가정과 미지원 link/ACL/xattr/대형 데이터 처리는 방법론의 구현 경계를 따른다. 실제 migration adapter는 사용자 실행 승인과 확정된 방법론 commit, 외부 writer/backup/restore/dependency 증적을 결합해야 한다.

@@ -1,0 +1,92 @@
+{
+  "schema_version": "0.1.0",
+  "subframework_id": "TRACE-DM",
+  "transaction_id": "MIGRATION.EXAMPLE.001",
+  "idempotency_key": "IDEMPOTENCY.EXAMPLE.001",
+  "migration_plan": {
+    "schema_version": "0.1.0",
+    "subframework_id": "TRACE-DM",
+    "plan": {
+      "transaction_id": "MIGRATION.EXAMPLE.001",
+      "idempotency_key": "IDEMPOTENCY.EXAMPLE.001",
+      "source": {
+        "partition_id": "PARTITION.SOURCE",
+        "host_id": "HOST.SOURCE",
+        "project_id": "PROJECT.SOURCE",
+        "root": "projects/source"
+      },
+      "destination": {
+        "partition_id": "PARTITION.DESTINATION",
+        "host_id": "HOST.DESTINATION",
+        "project_id": "PROJECT.DESTINATION",
+        "root": "projects/destination"
+      },
+      "scope_paths": [
+        "payload"
+      ],
+      "scope_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "cutoff": "2026-01-01T00:00:00Z",
+      "artifacts": [
+        {
+          "artifact_id": "ARTIFACT.EXAMPLE",
+          "revision_id": "REV.EXAMPLE.1",
+          "path": "payload/example.txt",
+          "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "canonical_owner": "PARTITION.SOURCE",
+          "parent_ids": []
+        }
+      ],
+      "external_parent_ids": [],
+      "dependency_manifest_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "shared_records": [],
+      "scoped_exports": [],
+      "writer_policy": {
+        "overlap_check_required": true,
+        "stale_and_offline_check_required": true,
+        "freeze_shared_entire_ledger": false
+      },
+      "archive": {
+        "transfer_mode": "copy",
+        "retain_original": true,
+        "retention_policy_ref": "POLICY.EXAMPLE.RETENTION",
+        "store_id": "STORE.ARCHIVE"
+      },
+      "backup": {
+        "independent_store_id": "STORE.BACKUP",
+        "restore_rehearsal_required": true
+      },
+      "rollback": {
+        "strategy": "compensating_events",
+        "preserve_new_data": true,
+        "t0_overwrite_forbidden": true
+      }
+    },
+    "approval": {
+      "execution_approval_ref": "APPROVAL.EXAMPLE.EXECUTION",
+      "methodology_commit": "1111111111111111111111111111111111111111",
+      "plan_sha256": "fe9f88e9cb827f6e352690991db08f82cbe0c78f0bf8ab632d511a8a2bd7b749"
+    }
+  },
+  "phase": "planned",
+  "last_verified_phase": "planned",
+  "source_write_state": "active",
+  "destination_business_writes": false,
+  "canonical_owner": "PARTITION.SOURCE",
+  "authority_epoch": 1,
+  "fencing": {
+    "mechanism": "unverified",
+    "verified": false,
+    "proof_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "writer_inventory_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "all_writers_quiescent": false,
+    "overlap_checked": false,
+    "stale_writer_checked": false,
+    "offline_writer_checked": false,
+    "scope_only": true
+  },
+  "archive_sha256": null,
+  "evidence": [],
+  "blockers": [],
+  "business_resume_approval_ref": null,
+  "cutover_receipt": null
+}
