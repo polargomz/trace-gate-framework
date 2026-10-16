@@ -44,6 +44,8 @@ def source(tmp_path):
 def link_case(tmp_path):
     root=tmp_path/'stage';root.mkdir(mode=0o700)
     for name in ('generated/lnInclude','run0/shared','jobs/shard0/run0'):(root/name).mkdir(parents=True,mode=0o700)
+    for directory in root.rglob('*'):
+        if directory.is_dir():directory.chmod(0o700)
     (root/'generated/function.h').write_bytes(b'header')
     inv=inventory(root)['entries'];policy=load_yaml(TEMPLATE_DIR/'document-migration-link-restore.yaml')
     policy['inventory']=[{k:r[k] for k in ('path','kind','sha256')} for r in inv]

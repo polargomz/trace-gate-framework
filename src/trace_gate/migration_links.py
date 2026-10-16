@@ -6,7 +6,20 @@ from pathlib import PurePosixPath
 from .migration import digest, relative_path, require, unique_paths
 
 
-def target_path(path: str, target: str) -> str:
+def directory_paths(inventory, links):
+    directories={''}|{p for p,r in inventory.items() if r['kind']=='directory'}
+    for path in set(inventory)|set(links):
+        directories.update(str(p) for p in PurePosixPath(path).parents if str(p)!='.')
+    return directories
+
+
+def target_path(path: str, target: str, *, directories, links, check_directory=None) -> str:
+    """Reject every raw intermediate symlink BEFORE dot-component removal.
+
+    Only an exact terminal link can form a declared chain. `alias/../file`
+    cannot erase an intermediate link (or missing/non-directory component).
+    Runtime callers also check each visited directory through no-follow dirfds.
+    """
     relative_path(path)
     require(len(path.encode()) <= 512 and len(target.encode()) <= 1024, "link descriptor path bound")
     require(bool(target) and not target.startswith("/") and "\\" not in target and ":" not in target, "absolute/drive/UNC link target")
@@ -14,6 +27,10 @@ def target_path(path: str, target: str) -> str:
     parts = path.split("/")[:-1]
     for part in target.split("/"):
         require(bool(part), "empty link target component")
+        current='/'.join(parts)
+        require(current not in links, 'raw intermediate symlink target unsupported')
+        require(current in directories, 'raw target traverses missing/non-directory component')
+        if check_directory is not None:check_directory(current)
         if part == ".":
             continue
         if part == "..":
@@ -45,6 +62,7 @@ def descriptor_errors(value):
                 key=str(parent)
                 require(key not in links, "intermediate symlink path unsupported")
                 require(key not in inventory or inventory[key]["kind"]=="directory", "non-directory inventory parent")
+        directories=directory_paths(inventory,links)
         resolved={};visiting=set()
         def resolve(path):
             if path in inventory:return inventory[path]
@@ -54,14 +72,12 @@ def descriptor_errors(value):
             if path in resolved:return resolved[path]
             visiting.add(path);row=links[path]
             require(hashlib.sha256(row["target"].encode()).hexdigest()==row["link_text_sha256"], "original link text hash mismatch")
-            destination=target_path(path,row["target"])
+            destination=target_path(path,row["target"],directories=directories,links=links)
             require(not any(str(parent) in links for parent in PurePosixPath(destination).parents), "intermediate symlink target unsupported")
             final=resolve(destination)
             require(final["sha256"]==row["target_sha256"] and final["kind"]==row["target_kind"], "link target inventory mismatch")
             visiting.remove(path);resolved[path]=final;return final
         for path in links:resolve(path)
-        directories={''}|{p for p,r in inventory.items() if r['kind']=='directory'}
-        for path in set(inventory)|set(links):directories.update(str(p) for p in PurePosixPath(path).parents if str(p)!='.')
         graph={d:set() for d in directories}
         for d in directories-{''}:
             parent=str(PurePosixPath(d).parent);graph['' if parent=='.' else parent].add(d)

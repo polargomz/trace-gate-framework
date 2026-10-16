@@ -8,6 +8,7 @@
 - 제한형 USTAR/gzip 안전 해제와 archive/내부 manifest/per-file·복원 hash 검증, path/link/권한/압축폭탄 음성 테스트를 추가했다.
 - failure checkpoint/PASS 주입을 통한 단계 우회와 abort 전이 누락을 재현하고 회귀 테스트로 교정했다. 실패/abort는 직전 checkpoint를 유지하며 abort는 명시 승인·writer-hold 증적을 요구하는 terminal 상태다.
 - 상대 링크 descriptor 정적 검증과 opt-in 실제 복원 adapter를 분리했다. 원 target 문자열/ID/hash, containment·cycle·target 검증과 일반 파일 후 마지막 링크 생성, 후속 regular restore 차단을 검사한다. 기본 archive 링크 거부는 유지한다.
+- raw `alias/../file`의 lexical/OS 해석 불일치를 실제 synthetic symlink로 재현·교정했다. 정규화로 제거되는 경로까지 중간 symlink·missing/non-directory를 거부하고 정상 `../file`·terminal chain은 유지한다. runtime raw no-follow 검사와 생성/사후/replay의 readlink·OS target identity 대조, hash 불일치·완료 receipt 차단 회귀 테스트를 추가했다.
 - 별도 raw chunk-set 형식에 bounded streaming pack/restore, 단일 대형 파일 분할, offset·part/whole hash·exact inventory, 예산·디스크 경계, 실패 보존과 명시적 동일 정책 resume를 추가했다. 기본 archive 256MiB 한도는 유지한다.
 - 물리 이전과 reference-only 계획·증적·digest·완료 의미를 구분했다. 외부 payload owner/위치/version/hash/권한/지속성·dependency/rollback을 결합하며 reference-only로 자동 축소하지 않는다.
 - 공개 예제를 외부 저장소·개발/실행 엔진 의존성·상대 참조·대형 artifact로 일반화했다. 실제 distributed writer fencing, 외부 저장소 복원·엔진 검증·프로젝트 이전·업무 활성화는 제공하지 않는다. 작은 synthetic fixture PASS는 실제 대형 자료의 복원 증명이 아니다.

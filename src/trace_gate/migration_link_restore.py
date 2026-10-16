@@ -6,14 +6,29 @@ import stat
 from .migration import digest,require,related_paths
 from .migration_archive import open_directory
 from .migration_io import private,claim_directory,write_json,read_json,exists,verify_tree,parent,file_hash,stage_lock,root_key
-from .migration_links import target_path
+from .migration_links import target_path,directory_paths
 
 
 def verify_target(root,row,policy):
     links={r['path']:r for r in policy['links']};inventory={r['path']:r for r in policy['inventory']}
-    path=target_path(row['path'],row['target'])
-    while path in links:path=target_path(path,links[path]['target'])
+    directories=directory_paths(inventory,links)
+    def check_directory(path):
+        if not path:return private(root)
+        with parent(root,path) as (directory,name):
+            fd=os.open(name,os.O_RDONLY|os.O_DIRECTORY|os.O_NOFOLLOW,dir_fd=directory)
+            try:private(fd)
+            finally:os.close(fd)
+    def resolve(item):
+        return target_path(item['path'],item['target'],directories=directories,links=links,check_directory=check_directory)
+    path=resolve(row);seen=set()
+    while path in links:
+        require(path not in seen and len(seen)<64,'live link cycle/depth bound');seen.add(path)
+        with parent(root,path) as (directory,name):
+            info=os.stat(name,dir_fd=directory,follow_symlinks=False)
+            require(stat.S_ISLNK(info.st_mode) and os.readlink(name,dir_fd=directory)==links[path]['target'],'live terminal link text/type changed')
+        path=resolve(links[path])
     expected=inventory[path]
+    require((expected['kind'],expected['sha256'])==(row['target_kind'],row['target_sha256']),'live target kind/hash binding mismatch')
     with parent(root,path) as (directory,name):
         info=os.stat(name,dir_fd=directory,follow_symlinks=False)
         if expected['kind']=='file':
@@ -23,6 +38,21 @@ def verify_target(root,row,policy):
             fd=os.open(name,os.O_RDONLY|os.O_DIRECTORY|os.O_NOFOLLOW,dir_fd=directory)
             try:private(fd)
             finally:os.close(fd)
+        return info
+
+
+def verify_actual_link(root,row,policy):
+    """After safe raw/chain verification, compare OS target inode/kind too.
+
+    Following here is metadata-only, never payload I/O or a write path. The
+    trusted frozen stage assumption remains; this is not hostile-UID fencing.
+    """
+    expected=verify_target(root,row,policy)
+    with parent(root,row['path']) as (directory,name):
+        info=os.stat(name,dir_fd=directory,follow_symlinks=False)
+        require(stat.S_ISLNK(info.st_mode) and os.readlink(name,dir_fd=directory)==row['target'],'final restored link text/type mismatch')
+        actual=os.stat(name,dir_fd=directory,follow_symlinks=True)
+        require((actual.st_dev,actual.st_ino,stat.S_IFMT(actual.st_mode))==(expected.st_dev,expected.st_ino,stat.S_IFMT(expected.st_mode)),'OS link target differs from verified target')
 
 
 def restore_relative_links(staging:Path,state_dir:Path,policy,expected_policy_sha256,staging_receipt,*,resume=False,resume_approval_ref=None):
@@ -54,14 +84,16 @@ def restore_relative_links(staging:Path,state_dir:Path,policy,expected_policy_sh
         require(sum(r['size_bytes'] for r in observed.values() if r['kind']=='file')<=approval['max_payload_bytes'] and all(r['size_bytes']<=approval['max_file_bytes'] for r in observed.values() if r['kind']=='file'),'approved link target byte bound')
         if exists(state,'completed.json'):
             verify_tree(root,policy['inventory'],policy['links'],max_items,allow_links=True)
+            for row in policy['links']:verify_actual_link(root,row,policy)
             require(read_json(state,'completed.json',2*1024**2)==result,'completed link receipt drift')
             return result
         actual=verify_tree(root,policy['inventory'],policy['links'],max_items,allow_links=resume,require_all_links=False)
         require(resume or not any(v['kind']=='link' for v in actual.values()),'links already present before restore')
         links={r['path']:r for r in policy['links']};ordered=[];done=set()
+        directories=directory_paths({r['path']:r for r in policy['inventory']},links)
         def order(path):
             if path in done:return
-            row=links[path];target=target_path(path,row['target'])
+            row=links[path];target=target_path(path,row['target'],directories=directories,links=links)
             if target in links:order(target)
             done.add(path);ordered.append(row)
         for path in sorted(links):order(path)
@@ -74,7 +106,9 @@ def restore_relative_links(staging:Path,state_dir:Path,policy,expected_policy_sh
                     os.symlink(row['target'],name,dir_fd=directory)
                     require(os.readlink(name,dir_fd=directory)==row['target'],'restored link text mismatch')
                     os.fsync(directory)
+            verify_actual_link(root,row,policy)
         verify_tree(root,policy['inventory'],policy['links'],max_items,allow_links=True)
+        for row in ordered:verify_actual_link(root,row,policy)
         write_json(state,'completed.json',result,2*1024**2)
         write_json(state,f'attempt-{attempt:08d}.json',result,2*1024**2);return result
     except BaseException as error:

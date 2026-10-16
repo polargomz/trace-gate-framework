@@ -125,9 +125,13 @@ cloud 충돌, offline writer, 미확인 삭제 전파, 공간·권한 문제는 
 
 `document-migration-link-policy.yaml`의 기본값은 `descriptor_plan_only`/`restore_supported=false`다. 정적 validator는 root containment, target 존재, 링크·디렉터리 순환, 중간 symlink 경유, Unicode/case/identity 충돌, dangling/absolute/drive/UNC/탈출 경로, target 문자열·inventory hash를 검사한다. `..`가 있어도 원 문자열을 바꾸지 않고 root 밖 탈출 여부를 판정한다. 기본 descriptor는 inventory 4,096개·링크 1,024개 이하, chain 64단계 이하로 제한한다.
 
+**raw target의 각 구성요소를 `.`/`..` 제거 전에 순서대로 검증한다.** 제거될 경로도 실제 존재하는 directory여야 하며 symlink를 경유할 수 없다. 예컨대 `alias → sub/dir`일 때 `alias/../file`은 lexical `file`과 OS의 `sub/file` 해석이 달라질 수 있으므로 거부한다. `missing/../file`, `file/../file`, `alias/.`도 거부한다. 정상 `../file`, directory를 통한 연속 `..`는 허용한다. 정확한 마지막 구성요소만 선언된 symlink chain으로 해소할 수 있으며 chain의 각 raw target에도 같은 규칙을 적용한다.
+
 명시 승인된 `document-migration-link-restore.yaml`은 `restore_relative_symlinks`/`restore_supported=true`다. `restore_relative_links`는 승인 policy와 inactive staging receipt를 digest로 결합하고 별도 private state에 claim/실패/완료 기록을 남긴다. inventory·링크 수·payload/file bytes를 승인 한도로 제한한다. 모든 보통 파일을 전수 해시 검증한 후 target-first 순서로 정확히 승인된 링크만 마지막에 생성한다. no-follow dirfd로 target 종류·존재와 파일 hash를 검사하고 링크 원문·전체 tree를 사후 대조한다. 디렉터리 digest는 정렬된 descendant의 상대 path·kind, 파일 SHA, 링크 원문·문자열 SHA를 canonical JSON 배열로 streaming hash한다. inode/time/ACL 복원 증명은 아니다.
 
 기존 파일을 덮어쓰지 않고 symlink parent를 따라 쓰지 않는다. 일반 파일 복원과 링크 복원은 같은 staging flock을 공유한다. 링크 생성 뒤 regular chunk restore는 봉인되어 후속 member 쓰기를 거부한다. 실패 시 partial 링크와 실패 receipt는 남으며 같은 policy·receipt에 대한 명시적 resume 승인만 허용한다. 이 로컬 협력 lock은 분산 fencing이 아니다. 동일 UID/root의 악의적 writer나 untrusted parent를 통제하지 않으므로 운영 quiescence가 필수다.
+
+runtime은 raw 경로에서 방문하는 directory를 no-follow dirfd로 다시 열어 종류·private 권한을 확인한다. terminal chain의 실제 readlink 문자열을 대조하고 최종 보통 파일 hash를 검증한다. 생성 직후·전체 사후 검사·완료 replay에서 원 readlink와 OS가 해석한 대상의 device/inode/kind를 안전하게 검증한 최종 target과 비교한다. 이 마지막 follow는 metadata 조회뿐이며 payload 읽기/쓰기 경로로 사용하지 않는다. 불일치면 완료 receipt를 만들지 않는다. 동결 범위에서의 동등성 검사이지 악성 동일 UID/root writer에 대한 race-free 분산 fencing 보장은 아니다.
 
 ### 대형 artifact의 bounded chunk-set
 
@@ -153,4 +157,4 @@ pack은 동결 source inventory를 전후 검증하며 part를 exclusive 생성�
 
 승인된 패키지에 한해서는 `trace_gate.migration_archive.extract_verified`를 adapter에서 호출한다. 기대 archive/manifest SHA는 신뢰된 외부 receipt에서 받아야 하고, destination은 새 private staging이어야 한다. 이 API의 `pass`는 안전 해제·파일 검증 결과일 뿐 source freeze, 수신 acceptance, cutover나 업무 활성화가 아니다.
 
-필수 실패 시험은 `tests/test_migration.py`, `test_migration_archive.py`, `test_migration_links.py`, `test_migration_optin.py`, `test_migration_reference.py`에 있다. premature write, cutover 누락, failed/unknown evidence, 위조 failure checkpoint/PASS 주입·abort, plan/epoch drift, parent/shared owner, mixed export, 이력 수정·신규 데이터 손실, path/link/TOCTOU·폭탄, chunk 경계·buffer·예산·부분 실패/재개, reference-only 증적/owner·모드 혼동을 검사한다. 실행기는 실제 writer·외부 저장소·sync·엔진 의존성 실패 시험을 추가해야 한다.
+필수 실패 시험은 `tests/test_migration.py`, `test_migration_archive.py`, `test_migration_links.py`, `test_migration_optin.py`, `test_migration_reference.py`, `test_migration_raw_links.py`에 있다. premature write, cutover 누락, failed/unknown evidence, 위조 failure checkpoint/PASS 주입·abort, plan/epoch drift, parent/shared owner, mixed export, 이력 수정·신규 데이터 손실, path/link/TOCTOU·폭탄, raw dot-component의 실제 OS 해석·target hash 불일치, chunk 경계·buffer·예산·부분 실패/재개, reference-only 증적/owner·모드 혼동을 검사한다. 실행기는 실제 writer·외부 저장소·sync·엔진 의존성 실패 시험을 추가해야 한다.

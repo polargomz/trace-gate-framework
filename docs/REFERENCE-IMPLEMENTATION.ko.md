@@ -139,6 +139,8 @@ Validator는 repository에서 Markdown을 직접 발견해 manifest coverage와 
 
 기본 link policy는 descriptor-only다. 별도 승인 `document-migration-link-restore.yaml`과 `restore_relative_links`를 선택하면 일반 파일 hash를 전수 대조한 뒤 상대 symlink를 마지막에 재구성하고 전체 tree/target 문자열을 재검증한다. stage flock은 regular restore와 공유하고 링크 생성 후 regular writes는 거부한다. 기본 archive의 링크 거부를 끄거나 중첩 archive/dereference로 우회하지 않는다. same-UID/root 악성 writer는 이 로컬 통제의 보장 범위 밖이다.
 
+raw target의 `..`로 사라질 중간 구성요소도 정규화 전에 검증한다. 중간 symlink·missing/non-directory는 거부하고 정상 부모 경로와 terminal chain만 허용한다. runtime은 동일 규칙과 no-follow directory 검사를 적용하며 terminal readlink·최종 target hash, 생성 후 OS 대상의 device/inode/kind를 대조한다. metadata-only follow는 payload 쓰기 경로가 아니며 불일치는 완료를 차단한다.
+
 `transition`은 검증된 checkpoint의 순수 비교·재개 모델이고 저장소 CAS가 아니다. failure checkpoint 상승/PASS 증거 주입을 거부하며 명시 승인된 abort는 writer-hold 상태로 종료한다. 신뢰된 current 상태는 caller 책임이다. `extract_verified`는 trusted receipt의 archive/내부 manifest SHA와 새 staging을 요구하고 제한형 USTAR/gzip의 모든 링크·특수파일·확장 헤더를 거부한다. 기본 archive 256MiB 제한은 변경하지 않았다.
 
 대형 artifact에는 기본 disabled streaming policy를 별도 승인해 `pack_chunk_set`/`restore_chunk_set`을 사용한다. raw part 상한 256MiB, buffer 상한 1MiB, metadata/item·aggregate/file·temp/disk 한도를 검증한다. 단일 파일 offset·part/whole hash, inventory closure, 부분 실패 보존과 동일 정책의 명시적 resume를 제공한다. 링크가 남으면 `regular_files_verified`일 뿐 전체 acceptance가 아니다. owner/ACL/xattr/실행권한/sparse extent와 엔진별 의존성 복원은 미지원이며 필수이면 차단한다.
