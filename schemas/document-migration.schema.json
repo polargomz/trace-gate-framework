@@ -116,8 +116,8 @@
                   },
                   "revision_id": {
                     "type": "string",
-                    "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$",
-                    "minLength": 3
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*(?![\\s\\S])",
+                    "minLength": 1
                   },
                   "path": {
                     "type": "string",
@@ -500,8 +500,8 @@
               },
               "revision_id": {
                 "type": "string",
-                "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$",
-                "minLength": 3
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*(?![\\s\\S])",
+                "minLength": 1
               }
             },
             "required": [
@@ -556,13 +556,13 @@
               },
               "old_revision_id": {
                 "type": "string",
-                "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$",
-                "minLength": 3
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*(?![\\s\\S])",
+                "minLength": 1
               },
               "new_revision_id": {
                 "type": "string",
-                "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$",
-                "minLength": 3
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*(?![\\s\\S])",
+                "minLength": 1
               },
               "old_management_revision": {
                 "type": "string",

@@ -68,6 +68,10 @@ symlink/hardlink는 lexical target 검사만으로 안전하지 않다. 실제 �
 
 해제 직후 전수 hash·size를 대조한다. 이후 Catalog, Manifest, 현재 resolver, 코드·설정·본문의 경로 의존성을 새 revision에서 업데이트한다. 원형 해제본·archive·historical event/receipt는 수정하지 않는다. `document-relocation-map.yaml`은 artifact ID, old/new revision·management revision, old/new path/hash, 내용 변경 여부를 연결한다. 바이트가 같은 payload는 원 revision/hash를 유지하고 위치 관리정보만 새 revision으로 만든다. 코드의 바이트가 바뀌면 파생 payload revision과 새 hash를 기록한다.
 
+기존 payload revision 문자열은 이름을 바꾸지 않고 보존한다. migration plan의 artifact `revision_id`, package file `revision_id`, relocation의 `old_revision_id`/`new_revision_id`는 `r1`, `r5` 같은 짧은 원문도 허용한다. 최소 길이는 기존 link/stream revision과 일관되게 1이며, 별도 근거 없이 2로 제한하지 않는다. 첫 문자는 ASCII 영숫자, 이후는 ASCII 영숫자·`.`·`_`·`:`·`-`만 허용하고 빈값·공백·slash·제어문자(끝 줄바꿈 포함)는 거부한다. prefix 추가·padding·trim이나 validator 우회로 원 identity를 바꾸지 않는다. 원문 변경 시 승인 plan digest를 다시 고정해야 하며 hash·내용·파생 revision 규칙은 그대로다.
+
+이 예외는 네 payload revision 필드에만 적용한다. stable artifact/partition/project/transaction/evidence ID와 management revision의 기존 최소 길이, core schema·다른 하부 계약은 바꾸지 않는다. core의 shared identifier를 사용하는 다른 소비자가 짧은 revision을 거부할 수 있으므로, 이번 수정의 PASS를 그 소비자 전체의 호환성으로 확대하지 않는다.
+
 절대 참조, 외부 저장소·엔진 의존성, 내부 상대 링크, 분할 실행 구조, mount, parent closure, 역참조, host/project/cwd와 접근권한을 검사한다. 옛 경로를 전체 검색치환해 불변 증거를 위조하지 않는다. 미지원 metadata·의존성 validator가 있으면 한계와 blocker를 기록한다.
 
 ## 7. 목적지 TRACE-DM에 수신·검증 완료를 기록한다
