@@ -53,6 +53,8 @@ flowchart TB
 
 ## 바로 사용하기
 
+참조 구현의 운영 보장 범위는 [교정 적합성 연결표](docs/REFERENCE-IMPLEMENTATION.ko.md#9-교정-적합성-연결표--2026-10-17)를 확인하십시오. 최신 교정은 verifier·명시적 resume·검증 metadata를 요구하므로 기존 adapter의 무검증 기본값을 허용하지 않습니다. 합성 테스트 PASS는 분산 권한·실제 운영 승격의 인증이 아닙니다.
+
 `templates/`에서 다음 파일을 프로젝트에 복사해 시작할 수 있습니다.
 
 - `request-receipt.yaml`: 작업 전 요청·권한 Receipt
@@ -92,6 +94,8 @@ AI/LLM이 문서에 접근하는 프로젝트는 TRACE-DM의 목적 기반 접�
 ## 버전
 
 현재 TRACE core 문서 버전은 `1.1.0`입니다. TRACE-DM `0.2.0`과 TRACE-AH `0.1.0`은 각각 독립 버전을 가집니다.
+
+Python 참조 구현은 `1.2.0`이며 core 문서/schema 버전과 별개입니다. 이번 실행 계약 강화는 기존 호출자에 대한 breaking change입니다. 필수 verifier, v2 checkpoint 재개 승인, evaluator `1.1.1` policy 및 context adapter metadata 이전 조건을 [구현 가이드](docs/REFERENCE-IMPLEMENTATION.ko.md)에서 확인해야 합니다. 기존 receipt/checkpoint를 새 버전으로 소급 수정하지 않습니다.
 
 선택적 TRACE-DM-MIGRATION 계약은 `0.1.0`이며 TRACE-DM `0.2.0`·core `1.1.x`와 호환된다. 기존 문서 상태 enum은 변경하지 않는다. 참조 검증/안전 해제는 실제 분산 fencing·NAS 복원·업무 재개 실행을 대신하지 않는다.
 

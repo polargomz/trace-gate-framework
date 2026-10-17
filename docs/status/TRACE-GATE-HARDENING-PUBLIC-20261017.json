@@ -1,0 +1,42 @@
+{
+  "schema": "trace-gate.public-hardening-verification/1",
+  "task_id": "TASK.TRACE-GATE.HARDENING.20261017",
+  "scope": "reference implementation only; no operational authorization",
+  "reference_package_version": "1.2.0",
+  "evaluator_version": "1.1.1",
+  "core_schema_version": "1.1.0",
+  "runtime_event_version": 2,
+  "requirements": ["TG-H01", "TG-H02", "TG-H03", "TG-H04", "TG-H05", "TG-H06"],
+  "baseline_tests": 357,
+  "pre_correction_regressions_failed_as_expected": 6,
+  "verification_result": {
+    "observed_at": "2026-10-17T06:21:23Z",
+    "status": "LOCAL_REFERENCE_TESTS_PASS_NOT_DEPLOYED",
+    "tests_passed": 422,
+    "tests_failed": 0,
+    "new_tests": 65,
+    "templates_passed": 24,
+    "managed_documents_passed": 10,
+    "diff_check": "PASS",
+    "runtime_demo": "COMPLETED_WITH_VERIFIER",
+    "gate_demo": "PASS_THRESHOLD_ONLY_NOT_AUTHORIZATION",
+    "quality_adapter_test": "SYNTHETIC_CONTRACT_AND_HASH_MISMATCH_PASS"
+  },
+  "verification_commands": [
+    ".venv/bin/python -m pytest -q -p no:cacheprovider",
+    ".venv/bin/python scripts/validate_templates.py",
+    "git diff --check",
+    "PYTHONPATH=src .venv/bin/python examples/runtime_demo.py",
+    ".venv/bin/python scripts/evaluate_gate.py templates/gate-decision.yaml examples/gate-facts.yaml"
+  ],
+  "input_class": "synthetic fixtures only",
+  "private_consumer_evidence": "retained outside public repository; not an operational gate input",
+  "remaining_production_requirements": [
+    "Authenticated approval and evidence resolvers",
+    "Independent checkpoint head and durable single-writer storage",
+    "Source manifest, lineage and field-aware sanitization",
+    "Cross-process writer fencing, cancellation acknowledgement and enforced timeout",
+    "Separate reviewed opt-in migration and operational activation"
+  ],
+  "production_activation": false
+}

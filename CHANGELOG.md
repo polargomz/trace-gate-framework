@@ -1,5 +1,13 @@
 # Changelog
 
+## Unreleased — Core/AH/DM boundary hardening (2026-10-17)
+
+- 리뷰의 6개 취약 동작을 먼저 실패 회귀로 고정한 뒤 교정했다. verifier 필수, checkpoint chain 검증, 실패 시도 예산·절대 deadline·명시 resume·결과 불명 쓰기 차단을 추가했다.
+- evaluator `1.1.1`은 finite/type/schema 검증과 evidence refs 필수를 적용한다. bound evaluator는 외부 신뢰 digest와 run/revision/Gate/facts/freshness를 결합한다. 기존 receipt는 소급 갱신하지 않는다.
+- Context selector는 active profile, 명시 대상, 건수·유효기간·필드·tier digest를 검증한다. 기존 adapter는 검증 metadata를 추가해야 하며 자동 호환 우회는 없다.
+- writer의 조상/자손·로컬 alias 충돌 및 미조정 만료 lease 재사용을 차단한다. 분산 fencing과 cancellation ACK는 여전히 운영 adapter 책임이다.
+- 적합성 연결표와 승인 범위 재사용 규칙, 품질 adapter의 합성 연결 검증을 추가했다. 코드 게시와 운영 활성화를 분리하며 실제 서비스·데이터·모델 호출은 변경하지 않는다.
+
 ## Unreleased — TRACE-DM-MIGRATION 0.1.0
 
 - 후속 호환성 교정: migration plan/package의 payload revision과 relocation old/new payload revision 네 필드만 최소 길이 3→1로 바꿔 `r1`/`r5` 원문을 보존한다. 기존 link/stream revision과 맞추며 다른 ID·management revision·core schema는 변경하지 않는다. 네 필드의 허용 alphabet은 유지하고 정규식의 정확한 끝 검사를 보강해 trailing newline도 거부한다. JSON/YAML·synthetic archive roundtrip, 내용/hash 보존·invalid revision·다른 ID 제약 회귀를 추가했다. 다른 core 소비자 전체의 짧은 revision 호환성을 뜻하지 않는다.

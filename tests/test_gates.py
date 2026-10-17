@@ -30,6 +30,7 @@ def test_gate_fails_on_threshold() -> None:
         "duplicate_writes": 0,
         "forbidden_changes": 0,
         "rollback_rehearsal": "pass",
+        "evidence_refs": ["EVD.1"],
     }
     assert evaluate_gate(policy(), facts).status == "fail"
 

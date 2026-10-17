@@ -4,7 +4,20 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
+from pathlib import Path
+import unicodedata
 from typing import Any
+
+
+def path_identity(value: str) -> Path:
+    """Local alias-aware identity; operational adapters must pin filesystem roots."""
+    if not isinstance(value, str) or not value or "\x00" in value:
+        raise ValueError("invalid scope path")
+    return Path(unicodedata.normalize("NFC", str(Path(value).resolve())).casefold())
+
+
+def overlaps(left: Path, right: Path) -> bool:
+    return left == right or left in right.parents or right in left.parents
 
 
 @dataclass(frozen=True)
@@ -35,8 +48,7 @@ class LeaseRegistry:
 
     def acquire(self, writer_key: str, task_id: str, expires_at: datetime) -> None:
         current = self._leases.get(writer_key)
-        now = datetime.now(UTC)
-        if current and current[1] > now and current[0] != task_id:
+        if current and current[0] != task_id:
             raise PermissionError(f"writer lease already held by {current[0]}")
         self._leases[writer_key] = (task_id, expires_at)
 
@@ -51,7 +63,8 @@ class AgentCoordinator:
     def __init__(self) -> None:
         self.tasks: dict[str, TaskState] = {}
         self.leases = LeaseRegistry()
-        self.parent_scopes: dict[str, dict[str, set[str]]] = {}
+        self.parent_scopes: dict[str, dict[str, set[Any]]] = {}
+        self.task_write_roots: dict[str, set[Path]] = {}
 
     def register_parent_scope(
         self,
@@ -62,9 +75,9 @@ class AgentCoordinator:
         allowed_tools: set[str],
     ) -> None:
         self.parent_scopes[parent_run_id] = {
-            "read_roots": read_roots,
-            "write_roots": write_roots,
-            "allowed_tools": allowed_tools,
+            "read_roots": {path_identity(p) for p in read_roots},
+            "write_roots": {path_identity(p) for p in write_roots},
+            "allowed_tools": set(allowed_tools),
         }
 
     def delegate(self, contract: TaskContract) -> None:
@@ -77,18 +90,25 @@ class AgentCoordinator:
         parent = self.parent_scopes.get(contract.parent_run_id)
         if parent is None:
             raise PermissionError("parent run scope is not registered")
-        if not set(contract.read_roots) <= parent["read_roots"]:
+        reads = {path_identity(p) for p in contract.read_roots}
+        writes = {path_identity(p) for p in contract.write_roots}
+        if not reads <= parent["read_roots"]:
             raise PermissionError("child read scope exceeds parent scope")
-        if not set(contract.write_roots) <= parent["write_roots"]:
+        if not writes <= parent["write_roots"]:
             raise PermissionError("child write scope exceeds parent scope")
         if not set(contract.allowed_tools) <= parent["allowed_tools"]:
             raise PermissionError("child tool scope exceeds parent scope")
         for task in self.tasks.values():
-            if task.status == "running" and set(task.contract.write_roots) & set(contract.write_roots):
+            active = self.task_write_roots[task.contract.task_id]
+            # Recheck aliases as well as the delegated identity; never relax an
+            # active reservation just because a symlink target or lease changed.
+            active = active | {path_identity(p) for p in task.contract.write_roots}
+            if task.status == "running" and any(overlaps(a, b) for a in active for b in writes):
                 raise PermissionError(f"write scope overlaps active task {task.contract.task_id}")
         if contract.writer_key:
             self.leases.acquire(contract.writer_key, contract.task_id, contract.expires_at)
         self.tasks[contract.task_id] = TaskState(contract=contract, status="running")
+        self.task_write_roots[contract.task_id] = writes
 
     def complete(
         self,
@@ -101,6 +121,8 @@ class AgentCoordinator:
         task = self.tasks[task_id]
         if task.status != "running":
             raise ValueError(f"task is not running: {task.status}")
+        if task.contract.expires_at <= datetime.now(UTC):
+            raise PermissionError("expired task requires reconciliation")
         if not verification_passed:
             raise PermissionError("child result requires independent verification")
         task.artifacts = artifacts
