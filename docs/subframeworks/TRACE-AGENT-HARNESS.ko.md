@@ -159,12 +159,15 @@ Run Ledger는 JSONL 또는 동등한 append-only store로 다음 event를 순서
 
 - `run_started`, `run_resumed`
 - `model_action`
+- `model_started`, `attempt_started` (교정 runtime v2의 호출 전 예산 예약)
 - `tool_observation`
 - `verification`
 - `delegation_requested`
 - `run_blocked`, `run_failed`, `run_completed`
 
 각 event는 sequence, 이전 event digest와 자체 digest를 가진다. Resume은 기존 action과 observation을 재생해 문맥을 복원하고 완료된 mutation을 다시 실행하지 않는다. 운영 구현은 idempotency key와 durable receipt를 tool adapter에도 전달해야 한다.
+
+교정 runtime v2는 ledger를 읽을 때 chain 및 완료/검증 결합을 확인한다. 실패한 model/tool 시도도 budget에서 제외하지 않는다. 원래 scope·limits와 절대 deadline을 고정하며 명시적 resume approval을 요구한다. 결과 불명 mutation은 reconciliation 전 재실행 금지다. verifier 미설정은 성공 기본값이 아니라 blocked다. 기존 ledger·receipt는 수정하지 않으며 형식 변경은 새 run으로 전환한다. 상세 집행 범위와 운영 adapter 잔여 조건은 참조 구현 가이드의 교정 적합성 연결표를 따른다.
 
 ## 10. Verification Loop와 Gate Evaluator
 

@@ -60,6 +60,7 @@
           "properties": {"id": {"type": "string"}, "version": {"type": "string"}}
         },
         "required": {"type": "object", "minProperties": 1},
+        "facts_schema": {"type": "object", "description": "JSON Schema for measurement types, units and bounds; mandatory for bound operational evaluation"},
         "decision": {
           "type": "object",
           "required": ["newly_allowed_authority", "still_forbidden"],

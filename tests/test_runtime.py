@@ -29,6 +29,7 @@ def test_runtime_blocks_amber_tool_without_authority() -> None:
     registry.register(ToolDefinition("write", "write state", "write", "amber", lambda args: args, idempotency_strategy="request-key"))
     kernel = RunKernel(
         run_id="RUN.BLOCK",
+        verifier=lambda _: {"passed": True},
         model=lambda messages: {"type": "tool_call", "tool_id": "write", "arguments": {}},
         registry=registry,
         allowed_tools={"write"},
@@ -71,6 +72,7 @@ def test_read_only_batch_is_supported() -> None:
     registry.register(ToolDefinition("read.two", "read two", "read", "green", lambda args: 2))
     result = RunKernel(
         run_id="RUN.BATCH",
+        verifier=lambda _: {"passed": True},
         model=lambda messages: next(actions),
         registry=registry,
         allowed_tools={"read.one", "read.two"},
@@ -83,24 +85,28 @@ def test_jsonl_checkpoint_can_resume(tmp_path) -> None:
     registry = ToolRegistry()
     registry.register(ToolDefinition("lookup", "read", "read", "green", lambda args: "value"))
     store_path = tmp_path / "run.jsonl"
+    actions = iter([{"type": "tool_call", "tool_id": "lookup", "arguments": {}},
+                    {"type": "delegate", "task": {"objective": "synthetic checkpoint"}}])
     first = RunKernel(
         run_id="RUN.RESUME",
-        model=lambda messages: {"type": "tool_call", "tool_id": "lookup", "arguments": {}},
-        registry=registry,
-        allowed_tools={"lookup"},
-        limits=RunLimits(max_steps=1, max_tool_calls=2, deadline_seconds=10),
-        event_store=EventStore(store_path),
-    ).run([{"role": "user", "content": "read then answer"}])
-    assert first.status == "failed"
-
-    resumed = RunKernel(
-        run_id="RUN.RESUME",
-        model=lambda messages: {"type": "answer", "content": "resumed"},
+        model=lambda messages: next(actions),
+        verifier=lambda _: {"passed": True},
         registry=registry,
         allowed_tools={"lookup"},
         limits=RunLimits(max_steps=3, max_tool_calls=2, deadline_seconds=10),
         event_store=EventStore(store_path),
     ).run([{"role": "user", "content": "read then answer"}])
+    assert first.status == "awaiting_delegation"
+
+    resumed = RunKernel(
+        run_id="RUN.RESUME",
+        model=lambda messages: {"type": "answer", "content": "resumed"},
+        verifier=lambda _: {"passed": True},
+        registry=registry,
+        allowed_tools={"lookup"},
+        limits=RunLimits(max_steps=3, max_tool_calls=2, deadline_seconds=10),
+        event_store=EventStore(store_path),
+    ).run([{"role": "user", "content": "read then answer"}], resume_approval_ref="APPROVAL.TEST.RESUME")
     assert resumed.status == "completed"
     assert resumed.answer == "resumed"
     assert any(event["type"] == "run_resumed" for event in EventStore(store_path).events)

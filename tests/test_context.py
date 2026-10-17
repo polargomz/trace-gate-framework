@@ -1,10 +1,14 @@
 from trace_gate.context import assemble_prompt, select_context
 from trace_gate.validation import TEMPLATE_DIR, load_yaml
+from datetime import UTC, datetime
+import hashlib
 
 
 def test_context_selector_enforces_freshness_and_budget() -> None:
     intent = load_yaml(TEMPLATE_DIR / "document-access-intent.yaml")
     profile = load_yaml(TEMPLATE_DIR / "document-read-profile.yaml")
+    profile["status"] = "active"
+    intent["targets"]["artifact_ids"] = ["DOC.CURRENT", "DOC.STALE"]
     artifacts = [
         {
             "artifact_id": "DOC.CURRENT",
@@ -12,7 +16,10 @@ def test_context_selector_enforces_freshness_and_budget() -> None:
             "validation_status": "pass",
             "freshness_status": "current",
             "sensitivity": "internal",
-            "source_digest": "sha256:one",
+            "source_digest": "sha256:" + "a" * 64,
+            "validated_at": datetime.now(UTC).isoformat(),
+            "tier_fields": {"summary": ["status"]},
+            "tier_digests": {"summary": "sha256:" + hashlib.sha256(b"current state").hexdigest()},
             "tiers": {"summary": "current state"},
         },
         {
